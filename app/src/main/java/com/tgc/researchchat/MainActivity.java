@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, chatClient.class);
                 intent.putExtra("ip&port", info);
                 startActivity(intent);
+                finish();
             }
         });
 

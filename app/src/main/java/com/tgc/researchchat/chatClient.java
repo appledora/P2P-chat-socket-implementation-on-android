@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -64,6 +65,10 @@ public class chatClient extends Activity {
                 if(!smessage.getText().toString().isEmpty()) {
                     User user = new User();
                     user.execute();
+                }
+                else{
+                    Toast toast=Toast.makeText(getApplicationContext(),"Please write something", Toast.LENGTH_SHORT);
+                    toast.show();
                 }
             }
         });

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class ChatAdapter extends ArrayAdapter {
 
-    public ChatAdapter(Activity context, ArrayList<Message> arr) {
+    ChatAdapter(Activity context, ArrayList<Message> arr) {
         super(context, 0, arr);
     }
 
@@ -22,12 +22,13 @@ public class ChatAdapter extends ArrayAdapter {
             listItemView = LayoutInflater.from(getContext()).inflate(R.layout.messagelist, parent, false);
         }
         Message currentMessage = (Message) getItem(position);
+        assert currentMessage != null;
         String message = currentMessage.getMessage();
-        if (currentMessage.isSent() && currentMessage.getMessage()!="") {
+        if (currentMessage.isSent()) {
             TextView sent = listItemView.findViewById(R.id.list_sent);
             sent.setText(message);
             sent.setVisibility(View.VISIBLE);
-        } else if(!currentMessage.isSent() && currentMessage.getMessage()!=""){
+        } else {
             TextView received = listItemView.findViewById(R.id.list_received);
             received.setText(message);
             received.setVisibility(View.VISIBLE);

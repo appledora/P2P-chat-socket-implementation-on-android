@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FAF8F7"
+    android:background="#FFF"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -25,13 +25,13 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="100dp"
             android:layout_weight="1"
-            android:background="#E91E63"
+            android:background="@color/colorAccent"
             android:fontFamily="serif-monospace"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:text=""
             android:textAlignment="center"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/colorPrimary"
             android:textSize="20sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -89,10 +89,10 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
             android:layout_weight="1"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPrimary"
             android:text="Connect"
             android:textAlignment="center"
-            android:textColor="#FFFFFF" />
+            android:textColor="@color/colorAccent" />
     </LinearLayout>
 
 </LinearLayout>

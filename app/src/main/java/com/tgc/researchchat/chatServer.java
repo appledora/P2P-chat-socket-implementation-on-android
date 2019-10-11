@@ -65,7 +65,7 @@ public class chatServer extends Thread {
         }
 
         protected void onPostExecute(String result) {
-            messageArray.add(new Message("Received: " + result, 1));
+            messageArray.add(new Message( result, 1));
             messageList.setAdapter(mAdapter);
 
         }

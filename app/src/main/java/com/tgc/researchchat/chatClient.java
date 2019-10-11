@@ -95,7 +95,7 @@ public class chatClient extends Activity {
 
             Log.i(TAG, "on post execution result => " + result);
 
-            messageArray.add(new Message("Sent: " + result, 0));
+            messageArray.add(new Message(result, 0));
             message_List.setAdapter(mAdapter);
             smessage.setText("");
         }

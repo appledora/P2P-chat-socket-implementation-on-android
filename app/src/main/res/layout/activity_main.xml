@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF"
+    android:background="@drawable/backgroundmain"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
@@ -15,7 +15,12 @@
         app:layout_constraintBottom_toTopOf="@id/connectButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingTop="30dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="#FFF"
+        >
         <TextView
             android:id="@+id/tvIp"
             android:layout_width="wrap_content"
@@ -23,6 +28,7 @@
             android:text="@string/your_ip"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:textColor="@color/colorPrimary"
             android:textSize="11sp"
             android:paddingStart="15dp"
             />
@@ -59,7 +65,9 @@
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
                 android:textAlignment="center"
-                android:inputType = "number"/>
+                android:inputType = "number"
+                android:text="5000"
+                />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -71,7 +79,6 @@
             android:theme="@style/TextLabel"
             app:layout_constraintBottom_toTopOf="@id/textinpIp"
             app:layout_constraintTop_toBottomOf="@id/textinpOwnIP">
-            >
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ipEditText"
                 android:layout_width="match_parent"
@@ -82,7 +89,9 @@
                 android:layout_weight="1"
                 android:textAlignment="center"
                 android:inputType = "number"
-                android:digits="0123456789."/>
+                android:digits="0123456789."
+                android:text="192.168.0."
+                />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -105,7 +114,10 @@
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
                 android:textAlignment="center"
-                android:inputType = "number"/>
+                android:inputType = "number"
+                android:text="5000"
+
+                />
         </com.google.android.material.textfield.TextInputLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
     <Button

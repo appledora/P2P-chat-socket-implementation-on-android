@@ -18,10 +18,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class chatClient extends Activity {
-    EditText serverIp, smessage;
-    TextView chat;
-    Button connectPhones, sent;
-    String serverIpAddress = "", msg = "", text = "";
+    EditText smessage;
+    Button sent;
+    String serverIpAddress = "";
     int myport;
     int sendPort;
     ServerSocket serverSocket;
@@ -37,8 +36,6 @@ public class chatClient extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbox);
-        chat = (TextView) findViewById(R.id.chat);
-        serverIp = (EditText) findViewById(R.id.server_ip);
         smessage = (EditText) findViewById(R.id.edittext_chatbox);
         message_List = findViewById(R.id.message_list);
         messageArray = new ArrayList<Message>();

@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     EditText port;
     EditText portText;
     Button connectButton;
-    Button showIPtextId;
+    TextView showIPtextId;
     String showIPaddress;
     String TAG = "MAIN";
 
@@ -29,12 +30,11 @@ public class MainActivity extends AppCompatActivity {
         ip = (EditText) findViewById(R.id.ipEditText);
         port = (EditText) findViewById(R.id.portEditText);
         connectButton = (Button) findViewById(R.id.connectButton);
-        showIPtextId = (Button) findViewById(R.id.showIPtextId);
+        showIPtextId = (TextView) findViewById(R.id.showIPtextId);
 
         WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-
                 showIPaddress = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-        showIPtextId.setText("IP ADDRESS : "+showIPaddress);
+        showIPtextId.setText(showIPaddress);
 
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override

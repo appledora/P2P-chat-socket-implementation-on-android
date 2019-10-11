@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ResearchChat</string>
+    <string name="dummy_ip">0.0.0.0</string>
+    <string name="your_ip">Your IP</string>
 </resources>

@@ -72,7 +72,7 @@ public class chatClient extends Activity {
     public class User extends AsyncTask<Void, Void, String> {
 
         String msg = smessage.getText().toString();
-        ;
+
 
         @Override
         protected String doInBackground(Void... voids) {

@@ -27,7 +27,6 @@ public class chatClient extends Activity {
     Handler handler = new Handler();
     String TAG = "CLIENT ACTIVITY";
     String tempS;
-    ListView messageRecycler;
     public static ChatAdapter mAdapter;
     ListView message_List;
     ArrayList<Message> messageArray;
@@ -44,7 +43,6 @@ public class chatClient extends Activity {
         message_List.setAdapter(mAdapter);
 
         sent = findViewById(R.id.button_chatbox_send);
-        messageRecycler = findViewById(R.id.message_list);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {

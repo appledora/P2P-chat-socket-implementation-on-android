@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         showIPtextId = findViewById(R.id.showIPtextId);
 
         WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-                showIPaddress = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+        showIPaddress = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
         showIPtextId.setText(showIPaddress);
 
         connectButton.setOnClickListener(view -> {
@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     String getInfo() {
-
         String info = this.ip.getText().toString()+" "+this.port.getText().toString()+" "+this.portText.getText().toString();
         Log.i(TAG, "info => "+info);
         return info;

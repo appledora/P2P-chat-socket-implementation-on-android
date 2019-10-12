@@ -29,11 +29,9 @@ public class chatServer extends Thread {
         this.port = port;
     }
 
-    ServerSocket initSocket = null;
-
     public void run() {
         try {
-            initSocket = new ServerSocket(port);
+            ServerSocket initSocket = new ServerSocket(port);
             initSocket.setReuseAddress(true);
             System.out.println(TAG + "started");
             while (true) {
@@ -45,7 +43,6 @@ public class chatServer extends Thread {
             e.printStackTrace();
         }
     }
-
     @SuppressLint("StaticFieldLeak")
     public class ReadFromClient extends AsyncTask<Socket, Void, String> {
         String text;
@@ -62,7 +59,6 @@ public class chatServer extends Thread {
             }
             return text;
         }
-
         protected void onPostExecute(String result) {
                 messageArray.add(new Message(result, 1));
                 messageList.setAdapter(mAdapter);

@@ -23,6 +23,8 @@ public class ChatAdapter extends ArrayAdapter {
         }
         Message currentMessage = (Message) getItem(position);
         assert currentMessage != null;
+        System.out.println(currentMessage.getMessage());
+        System.out.println(currentMessage.isSent());
         String message = currentMessage.getMessage();
         if (currentMessage.isSent()) {
             TextView sent = listItemView.findViewById(R.id.list_sent);

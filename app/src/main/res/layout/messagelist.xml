@@ -1,38 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minEms="3"
-        android:background="@drawable/rounded_rectangle_orange"
-        android:textSize="15sp"
-        android:layout_alignParentEnd="true"
-        android:textColor="@color/colorAccent"
-        android:id="@+id/list_sent"
-        android:visibility="gone"
-        android:padding="13dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginTop="3dp"
-        android:text="Something Something"
-        />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minEms="3"
-        android:background="@drawable/rounded_rectangle_green"
-        android:textSize="15sp"
-        android:layout_alignParentStart="true"
-        android:textColor="@color/colorPrimary"
-        android:id="@+id/list_received"
-        android:visibility="gone"
-        android:text="Something"
-        android:padding="13dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="3dp"
 
-        />
-</RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minEms="3"
+            android:background="@drawable/rounded_rectangle_orange"
+            android:textSize="15sp"
+            android:layout_alignParentEnd="true"
+            android:textColor="@color/colorAccent"
+            android:id="@+id/list_sent"
+            android:visibility="gone"
+            android:padding="13dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginTop="3dp"
+            android:text="Something Something" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minEms="3"
+            android:background="@drawable/rounded_rectangle_green"
+            android:textSize="15sp"
+            android:layout_alignParentStart="true"
+            android:textColor="@color/colorPrimary"
+            android:id="@+id/list_received"
+            android:visibility="gone"
+            android:text="Something"
+            android:padding="13dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="3dp" />
+    </RelativeLayout>
+</ScrollView>

@@ -1,5 +1,6 @@
 package com.tgc.researchchat;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ListView;
@@ -14,27 +15,24 @@ import java.util.ArrayList;
 
 public class chatServer extends Thread {
 
-    String TAG = "CHATSERVER";
+    private String TAG = "CHATSERVER";
 
-    ListView messageList;
-    ArrayList<Message> messageArray;
-    ChatAdapter mAdapter;
+    private ListView messageList;
+    private ArrayList<Message> messageArray;
+    private ChatAdapter mAdapter;
 
-    int port;
+    private int port;
 
-    public chatServer(ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port) {
+    chatServer(ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port) {
         this.messageArray = messageArray;
         this.messageList = messageList;
         this.mAdapter = mAdapter;
         this.port = port;
     }
 
-    ServerSocket initSocket = null;
-
     public void run() {
         try {
-            String text;
-            initSocket = new ServerSocket(port);
+            ServerSocket initSocket = new ServerSocket(port);
             initSocket.setReuseAddress(true);
 
             System.out.println(TAG + "started");
@@ -47,7 +45,7 @@ public class chatServer extends Thread {
             e.printStackTrace();
         }
     }
-
+    @SuppressLint("StaticFieldLeak")
     public class ReadFromClient extends AsyncTask<Socket, Void, String> {
         String text;
 
@@ -63,12 +61,9 @@ public class chatServer extends Thread {
             }
             return text;
         }
-
         protected void onPostExecute(String result) {
-            if(result!="") {
                 messageArray.add(new Message(result, 1));
                 messageList.setAdapter(mAdapter);
-            }
         }
     }
 

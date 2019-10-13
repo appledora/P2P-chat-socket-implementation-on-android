@@ -1,15 +1,15 @@
 package com.tgc.researchchat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -27,23 +27,22 @@ public class chatClient extends Activity {
     Handler handler = new Handler();
     String TAG = "CLIENT ACTIVITY";
     String tempS;
-    ListView messageRecycler;
     public static ChatAdapter mAdapter;
     ListView message_List;
     ArrayList<Message> messageArray;
 
+    @SuppressLint("CutPasteId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbox);
-        smessage = (EditText) findViewById(R.id.edittext_chatbox);
+        smessage = findViewById(R.id.edittext_chatbox);
         message_List = findViewById(R.id.message_list);
-        messageArray = new ArrayList<Message>();
+        messageArray = new ArrayList<>();
         mAdapter = new ChatAdapter(this, messageArray);
         message_List.setAdapter(mAdapter);
 
-        sent = (Button) findViewById(R.id.button_chatbox_send);
-        messageRecycler = findViewById(R.id.message_list);
+        sent = findViewById(R.id.button_chatbox_send);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -58,19 +57,20 @@ public class chatClient extends Activity {
             chatServer s = new chatServer(mAdapter, message_List, messageArray, myport);
             s.start();
         }
-        sent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!smessage.getText().toString().isEmpty()) {
-                    User user = new User();
-                    user.execute();
-                }
+        sent.setOnClickListener(v -> {
+            if (!smessage.getText().toString().isEmpty()) {
+                User user = new User();
+                user.execute();
+            } else {
+                Toast toast = Toast.makeText(getApplicationContext(), "Please write something", Toast.LENGTH_SHORT);
+                toast.show();
             }
         });
 
 
     }
 
+    @SuppressLint("StaticFieldLeak")
     public class User extends AsyncTask<Void, Void, String> {
 
         String msg = smessage.getText().toString();
@@ -86,12 +86,7 @@ public class chatClient extends Activity {
                 output.println(msg);
                 output.flush();
                 clientSocket.close();
-                runOnUiThread(new Runnable() {
-                                  @Override
-                                  public void run() {
-                                      sent.setEnabled(false);
-                                  }
-                              }
+                runOnUiThread(() -> sent.setEnabled(false)
                 );
             } catch (Exception e) {
                 e.printStackTrace();
@@ -100,18 +95,12 @@ public class chatClient extends Activity {
         }
 
         protected void onPostExecute(String result) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    sent.setEnabled(true);
-                }
-            });
+            runOnUiThread(() -> sent.setEnabled(true));
             Log.i(TAG, "on post execution result => " + result);
-            if(result!= "") {
-                messageArray.add(new Message(result, 0));
-                message_List.setAdapter(mAdapter);
-                smessage.setText("");
-            }
+            messageArray.add(new Message(result, 0));
+            message_List.setAdapter(mAdapter);
+            smessage.setText("");
+
         }
 
 

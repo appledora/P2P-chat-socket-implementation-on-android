@@ -2,6 +2,7 @@ package com.tgc.researchchat;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 
 public class chatClient extends Activity {
     EditText smessage;
-    Button sent;
+    Button sent, bfile;
     String serverIpAddress = "";
     int myport;
     int sendPort;
@@ -30,6 +31,7 @@ public class chatClient extends Activity {
     public static ChatAdapter mAdapter;
     ListView message_List;
     ArrayList<Message> messageArray;
+    Intent intent;
 
     @SuppressLint("CutPasteId")
     @Override
@@ -43,6 +45,7 @@ public class chatClient extends Activity {
         message_List.setAdapter(mAdapter);
 
         sent = findViewById(R.id.button_chatbox_send);
+        bfile = findViewById(R.id.button_send_file);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -57,6 +60,8 @@ public class chatClient extends Activity {
             chatServer s = new chatServer(mAdapter, message_List, messageArray, myport);
             s.start();
         }
+
+
         sent.setOnClickListener(v -> {
             if (!smessage.getText().toString().isEmpty()) {
                 User user = new User();
@@ -65,6 +70,13 @@ public class chatClient extends Activity {
                 Toast toast = Toast.makeText(getApplicationContext(), "Please write something", Toast.LENGTH_SHORT);
                 toast.show();
             }
+        });
+
+        bfile.setOnClickListener(view -> {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.setType("*/*");
+            startActivityForResult(intent, 7);
         });
 
 
@@ -105,6 +117,25 @@ public class chatClient extends Activity {
 
 
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO Auto-generated method stub
 
+        switch(requestCode){
+
+            case 7:
+
+                if(resultCode==RESULT_OK){
+
+                    String PathHolder = data.getData().getPath();
+
+                    Toast.makeText(chatClient.this, PathHolder , Toast.LENGTH_LONG).show();
+                    Log.i(TAG,"FilePath => "+PathHolder);
+
+                }
+                break;
+
+        }
+    }
 
 }

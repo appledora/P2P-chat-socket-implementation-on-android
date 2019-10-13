@@ -23,15 +23,21 @@ public class ChatAdapter extends ArrayAdapter {
         }
         Message currentMessage = (Message) getItem(position);
         assert currentMessage != null;
+        TextView sent = listItemView.findViewById(R.id.list_sent);
+        TextView received = listItemView.findViewById(R.id.list_received);
+
+        sent.setText("");
+        sent.setVisibility(View.GONE);
+        received.setText("");
+        received.setVisibility(View.GONE);
+
         System.out.println(currentMessage.getMessage());
         System.out.println(currentMessage.isSent());
         String message = currentMessage.getMessage();
         if (currentMessage.isSent()) {
-            TextView sent = listItemView.findViewById(R.id.list_sent);
             sent.setText(message);
             sent.setVisibility(View.VISIBLE);
         } else {
-            TextView received = listItemView.findViewById(R.id.list_received);
             received.setText(message);
             received.setVisibility(View.VISIBLE);
         }

@@ -5,21 +5,24 @@
     android:layout_height="match_parent"
     >
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minEms="3"
         android:background="@drawable/rounded_rectangle_orange"
         android:textSize="15sp"
         android:layout_alignParentEnd="true"
         android:textColor="@color/colorAccent"
         android:id="@+id/list_sent"
         android:visibility="gone"
-        android:padding="8dp"
+        android:padding="13dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="3dp"
         android:text="Something Something"
-        android:layout_marginStart="100dp"
         />
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minEms="3"
         android:background="@drawable/rounded_rectangle_green"
         android:textSize="15sp"
         android:layout_alignParentStart="true"
@@ -27,7 +30,9 @@
         android:id="@+id/list_received"
         android:visibility="gone"
         android:text="Something"
-        android:padding="8dp"
-        android:layout_marginEnd="100dp"
+        android:padding="13dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="3dp"
+
         />
 </RelativeLayout>

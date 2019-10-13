@@ -61,8 +61,10 @@ public class chatClient extends Activity {
         sent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                User user = new User();
-                user.execute();
+                if(!smessage.getText().toString().isEmpty()) {
+                    User user = new User();
+                    user.execute();
+                }
             }
         });
 
@@ -72,7 +74,6 @@ public class chatClient extends Activity {
     public class User extends AsyncTask<Void, Void, String> {
 
         String msg = smessage.getText().toString();
-
 
         @Override
         protected String doInBackground(Void... voids) {
@@ -85,6 +86,13 @@ public class chatClient extends Activity {
                 output.println(msg);
                 output.flush();
                 clientSocket.close();
+                runOnUiThread(new Runnable() {
+                                  @Override
+                                  public void run() {
+                                      sent.setEnabled(false);
+                                  }
+                              }
+                );
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -92,12 +100,18 @@ public class chatClient extends Activity {
         }
 
         protected void onPostExecute(String result) {
-
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    sent.setEnabled(true);
+                }
+            });
             Log.i(TAG, "on post execution result => " + result);
-
-            messageArray.add(new Message(result, 0));
-            message_List.setAdapter(mAdapter);
-            smessage.setText("");
+            if(result!= "") {
+                messageArray.add(new Message(result, 0));
+                message_List.setAdapter(mAdapter);
+                smessage.setText("");
+            }
         }
 
 

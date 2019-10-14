@@ -67,6 +67,7 @@ String serverIpAddress;
                     DataInputStream dataInputStream = new DataInputStream(inputStream);
 
                     String fileName = dataInputStream.readUTF();
+                    text = fileName;
                     File outputFile = new File(testDirectory, fileName);
 
                     OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
@@ -94,7 +95,7 @@ String serverIpAddress;
 
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
-            messageArray.add(new Message(result, 1));
+            messageArray.add(new Message("New File Received: " + result, 1));
             messageList.setAdapter(mAdapter);
         }
     }

@@ -94,6 +94,8 @@ String serverIpAddress;
 
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
+            messageArray.add(new Message(result, 1));
+            messageList.setAdapter(mAdapter);
         }
     }
 

@@ -113,7 +113,7 @@ public class chatClient extends AppCompatActivity {
         fileUp.setOnClickListener(v -> {
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            intent.setType("text/*");
+            intent.setType("*/*");
             startActivityForResult(Intent.createChooser(intent, "Select file"), 1);
         });
 
@@ -174,8 +174,13 @@ public class chatClient extends AppCompatActivity {
             path = txtUri.getPath();
             Log.d(TAG, "onActivityResult: " + path);
             String[] arrOfStr = path.split(":");
-            Log.d(TAG, "onActivityResult: " + arrOfStr[1]);
-            new fileTransfer(arrOfStr[1]).execute();
+            if (arrOfStr.length > 1) {
+                Log.d(TAG, "onActivityResult: Textual " + path);
+                new fileTransfer(arrOfStr[1]).execute();
+            } else {
+                Log.d(TAG, "onActivityResult: Image " + path);
+                new fileTransfer(arrOfStr[0]).execute();
+            }
         }
     }
 
@@ -257,6 +262,7 @@ public class chatClient extends AppCompatActivity {
                 if (path.charAt(0) != '/') {
                     path = "/storage/emulated/0/" + path;
                 }
+                Log.d(TAG, "doInBackground: Storage Here " + path);
                 File file = new File(path);
                 if (path.isEmpty()) {
                     Toast toast = Toast.makeText(getApplicationContext(), "Path is empty", Toast.LENGTH_SHORT);

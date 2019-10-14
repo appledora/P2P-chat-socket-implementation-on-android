@@ -15,17 +15,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class chatServer extends Thread {
+public class fileServer extends Thread {
 
-    private String TAG = "CHATSERVER";
-
+    Context context;
+    private String TAG = "FILE SERVER";
     private ListView messageList;
     private ArrayList<Message> messageArray;
     private ChatAdapter mAdapter;
-    Context context;
     private int port;
 
-    chatServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port) {
+    fileServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port) {
         this.messageArray = messageArray;
         this.messageList = messageList;
         this.mAdapter = mAdapter;
@@ -35,20 +34,23 @@ public class chatServer extends Thread {
 
     public void run() {
         try {
-            ServerSocket initSocket = new ServerSocket(port);
-            initSocket.setReuseAddress(true);
+            ServerSocket fileSocket = new ServerSocket(port + 1);
+            Log.d(TAG, "run: " + fileSocket.getLocalPort());
+            fileSocket.setReuseAddress(true);
             System.out.println(TAG + "started");
             while (true) {
-                Socket connectSocket = initSocket.accept();
-                ReadFromClient handle = new ReadFromClient();
-                handle.execute(connectSocket);
+                Socket connectFileSocket = fileSocket.accept();
+                Log.d(TAG, "run: File Opened");
+                fileFromClient handleFile = new fileFromClient();
+                handleFile.execute(connectFileSocket);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     @SuppressLint("StaticFieldLeak")
-    public class ReadFromClient extends AsyncTask<Socket, Void, String> {
+    public class fileFromClient extends AsyncTask<Socket, Void, String> {
         String text;
 
         @Override
@@ -62,29 +64,22 @@ public class chatServer extends Thread {
             }
             return text;
         }
+
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
-            if (result.charAt(0) == '1' && result.charAt(1) == ':') {
-                StringBuilder stringBuilder = new StringBuilder(result);
-                stringBuilder.deleteCharAt(0);
-                stringBuilder.deleteCharAt(0);
-                result = stringBuilder.toString();
-                messageArray.add(new Message(result, 1));
-                messageList.setAdapter(mAdapter);
-            } else {
-                try {
-                    Log.i(TAG, "else cause");
-                    File file = new File(context.getObbDir(), "testfile.txt");
-                    Log.i(TAG, "FIle dir => " + file);
-                    FileWriter writer = new FileWriter(file);
-                    writer.append(result);
-                    writer.flush();
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+            try {
+                Log.i(TAG, "else cause");
+                File file = new File(context.getObbDir(), "testfile.txt");
+                Log.i(TAG, "FIle dir => " + file);
+                FileWriter writer = new FileWriter(file);
+                writer.append(result);
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
         }
     }
+
 }

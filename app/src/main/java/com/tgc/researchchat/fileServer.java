@@ -15,7 +15,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class fileServer extends Thread {
 
@@ -67,8 +69,8 @@ String serverIpAddress;
                     DataInputStream dataInputStream = new DataInputStream(inputStream);
 
                     String fileName = dataInputStream.readUTF();
-                    text = fileName;
                     File outputFile = new File(testDirectory, fileName);
+                    text = fileName;
 
                     OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
                     long fileSize = dataInputStream.readLong();
@@ -97,6 +99,18 @@ String serverIpAddress;
             Log.d(TAG, "onPostExecute: Result" + result);
             messageArray.add(new Message("New File Received: " + result, 1));
             messageList.setAdapter(mAdapter);
+            File filepath = context.getObbDir();
+            Log.i(TAG, "FilesDir =>" + filepath + "\n");
+            String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
+            File file = new File(filepath, fileName);
+            try {
+                FileOutputStream fos = new FileOutputStream(file, true);
+                String history = "Server received a file from => " + serverIpAddress + "\n";
+                fos.write(history.getBytes());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
     }
 

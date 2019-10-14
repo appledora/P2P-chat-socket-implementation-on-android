@@ -155,7 +155,7 @@ public class chatClient extends Activity {
 
     }
 
-    class fileTransfer extends AsyncTask<Void, Integer, Integer> {
+    class fileTransfer extends AsyncTask<Void, Integer, String> {
         String path;
 
         fileTransfer(String path) {
@@ -163,7 +163,8 @@ public class chatClient extends Activity {
         }
 
         @Override
-        protected Integer doInBackground(Void... voids) {
+        protected String doInBackground(Void... voids) {
+            String filenameX = "";
             String ipadd = serverIpAddress;
             int portr = sendPort + 1;
             try {
@@ -192,6 +193,8 @@ public class chatClient extends Activity {
                 dataOutputStream.writeUTF(file.getName());
                 dataOutputStream.writeLong(byteArray.length);
 
+                filenameX = file.getName();
+
                 dataOutputStream.write(byteArray, 0, byteArray.length);
                 dataOutputStream.flush();
 
@@ -205,7 +208,26 @@ public class chatClient extends Activity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
+            return filenameX;
+        }
+
+        @Override
+        protected void onPostExecute(String name) {
+            File filepath = getApplicationContext().getObbDir();
+            Log.i(TAG, "FilesDir =>" + filepath + "\n");
+            String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
+            File file = new File(filepath, fileName);
+            try {
+                FileOutputStream fos = new FileOutputStream(file, true);
+                String history = "client sent a file from => " + path + "\n";
+                fos.write(history.getBytes());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            messageArray.add(new Message("New File Sent:" + name, 0));
+            message_List.setAdapter(mAdapter);
+            smessage.setText("");
         }
     }
 

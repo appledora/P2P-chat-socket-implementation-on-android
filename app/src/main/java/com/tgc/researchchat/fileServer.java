@@ -6,11 +6,13 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ListView;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -56,9 +58,26 @@ public class fileServer extends Thread {
         @Override
         protected String doInBackground(Socket... sockets) {
             try {
-                BufferedReader input = new BufferedReader(new InputStreamReader(sockets[0].getInputStream()));
-                text = input.readLine();
-                Log.i(TAG, "Received => " + text);
+                File testDirectory = new File(context.getObbDir(), "recordFolder");
+                if (!testDirectory.exists())
+                    testDirectory.mkdirs();
+                File outputFile = new File(testDirectory, "recording1");
+                try {
+                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
+                    BufferedInputStream bufferedInputStream = new BufferedInputStream(sockets[0].getInputStream());
+                    byte[] byteArray = new byte[8192 * 16];
+                    int count;
+                    while ((count = bufferedInputStream.read(byteArray, 0, byteArray.length)) != -1) {
+                        outputStream.write(byteArray, 0, count);
+                    }
+
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -67,17 +86,17 @@ public class fileServer extends Thread {
 
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
-            try {
-                Log.i(TAG, "else cause");
-                File file = new File(context.getObbDir(), "testfile.txt");
-                Log.i(TAG, "FIle dir => " + file);
-                FileWriter writer = new FileWriter(file);
-                writer.append(result);
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Log.i(TAG, "else cause");
+//                File file = new File(context.getObbDir(), "testfile.txt");
+//                Log.i(TAG, "FIle dir => " + file);
+//                FileWriter writer = new FileWriter(file);
+//                writer.append(result);
+//                writer.flush();
+//                writer.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
         }
     }

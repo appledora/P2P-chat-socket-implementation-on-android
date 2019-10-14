@@ -17,12 +17,15 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class chatClient extends Activity {
     EditText smessage;
@@ -62,9 +65,9 @@ public class chatClient extends Activity {
             myport = Integer.parseInt(infos[2]);
         }
         if (!serverIpAddress.equals("")) {
-            chatServer s = new chatServer(getApplicationContext(), mAdapter, message_List, messageArray, myport);
+            chatServer s = new chatServer(getApplicationContext(), mAdapter, message_List, messageArray, myport,serverIpAddress);
             s.start();
-            fileServer f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport);
+            fileServer f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport,serverIpAddress);
             f.start();
         }
         sent.setOnClickListener(v -> {
@@ -132,6 +135,17 @@ public class chatClient extends Activity {
             stringBuilder.deleteCharAt(0);
             stringBuilder.deleteCharAt(0);
             result = stringBuilder.toString();
+            File path = getApplicationContext().getObbDir();
+            Log.i(TAG,"FilesDir =>" + path+ "\n");
+            String fileName =  new SimpleDateFormat("yyyyMMdd").format(new Date()) +"-" + serverIpAddress + ".txt";
+            File file = new File(path,fileName);
+            try {
+                FileOutputStream fos = new FileOutputStream(file,true);
+                String history = "client: " +result+"\n";
+                fos.write(history.getBytes());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             messageArray.add(new Message(result, 0));
             message_List.setAdapter(mAdapter);
             smessage.setText("");

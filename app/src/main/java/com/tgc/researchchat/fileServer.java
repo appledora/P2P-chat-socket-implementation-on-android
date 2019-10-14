@@ -61,17 +61,7 @@ public class fileServer extends Thread {
                 File testDirectory = new File(context.getObbDir(), "recordFolder");
                 if (!testDirectory.exists())
                     testDirectory.mkdirs();
-//                File outputFile = new File(testDirectory, "recording1");
                 try {
-//                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
-//                    BufferedInputStream bufferedInputStream = new BufferedInputStream(sockets[0].getInputStream());
-//                    byte[] byteArray = new byte[8192 * 16];
-//                    int count;
-//                    while ((count = bufferedInputStream.read(byteArray, 0, byteArray.length)) != -1) {
-//                        outputStream.write(byteArray, 0, count);
-//                    }
-//                    outputStream.flush();
-//                    outputStream.close();
                     InputStream inputStream = sockets[0].getInputStream();
                     DataInputStream dataInputStream = new DataInputStream(inputStream);
 
@@ -103,18 +93,6 @@ public class fileServer extends Thread {
 
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
-//            try {
-//                Log.i(TAG, "else cause");
-//                File file = new File(context.getObbDir(), "testfile.txt");
-//                Log.i(TAG, "FIle dir => " + file);
-//                FileWriter writer = new FileWriter(file);
-//                writer.append(result);
-//                writer.flush();
-//                writer.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-
         }
     }
 

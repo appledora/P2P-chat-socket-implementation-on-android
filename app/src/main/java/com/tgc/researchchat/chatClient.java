@@ -80,7 +80,7 @@ public class chatClient extends Activity {
         fileUp.setOnClickListener(v -> {
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            intent.setType("*/*");
+            intent.setType("text/*");
             startActivityForResult(Intent.createChooser(intent, "Select file"), 1);
         });
 
@@ -165,7 +165,7 @@ public class chatClient extends Activity {
                 Log.d(TAG, "doInBackground: " + path);
 
                 FileInputStream fileInputStream = new FileInputStream(file);
-//                BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+
                 long fileSize = file.length();
                 byte[] byteArray = new byte[(int) fileSize];
 
@@ -186,13 +186,7 @@ public class chatClient extends Activity {
 
                 outputStream.close();
                 dataOutputStream.close();
-//                int transactionBytes = 0;
-//                while ((transactionBytes = bufferedInputStream.read(byteArray, 0, byteArray.length)) != -1) {
-//                    outputStream.write(byteArray, 0, byteArray.length);
-//                    Log.d(TAG, "doInBackground: Transfering Bytes" + transactionBytes);
-//                }
-//                outputStream.flush();
-//                bufferedInputStream.close();
+
                 clientSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();

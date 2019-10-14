@@ -43,12 +43,13 @@ String serverIpAddress;
             Log.d(TAG, "run: " + fileSocket.getLocalPort());
             fileSocket.setReuseAddress(true);
             System.out.println(TAG + "started");
-            while (true) {
+            while (!Thread.interrupted()) {
                 Socket connectFileSocket = fileSocket.accept();
                 Log.d(TAG, "run: File Opened");
                 fileFromClient handleFile = new fileFromClient();
                 handleFile.execute(connectFileSocket);
             }
+            fileSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +19,7 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -55,7 +58,11 @@ public class chatClient extends AppCompatActivity {
     ListView message_List;
     ArrayList<Message> messageArray;
     ImageButton fileUp;
-
+    TextView textView;
+    chatServer s;
+    fileServer f;
+    String ownIp;
+    private Boolean exit = false;
     @SuppressLint("CutPasteId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +73,7 @@ public class chatClient extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         sent = findViewById(R.id.button_chatbox_send);
         fileUp = findViewById(R.id.file_send);
+        textView = findViewById(R.id.textView);
 
         setSupportActionBar(toolbar);
 
@@ -81,13 +89,15 @@ public class chatClient extends AppCompatActivity {
             sendPort = Integer.parseInt(infos[1]);
             myport = Integer.parseInt(infos[2]);
         }
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        ownIp = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
 
         getSupportActionBar().setTitle("Connection to " + serverIpAddress);
 
         if (!serverIpAddress.equals("")) {
-            chatServer s = new chatServer(this, getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress);
+            s = new chatServer(ownIp, this, getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress);
             s.start();
-            fileServer f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport,serverIpAddress);
+            f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress);
             f.start();
         }
         sent.setOnClickListener(v -> {
@@ -311,4 +321,21 @@ public class chatClient extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (exit) {
+            finish(); // finish activity
+        } else {
+            Toast.makeText(this, "Press Back again to Exit.",
+                    Toast.LENGTH_SHORT).show();
+            exit = true;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    exit = false;
+                }
+            }, 3 * 1000);
+
+        }
+    }
 }

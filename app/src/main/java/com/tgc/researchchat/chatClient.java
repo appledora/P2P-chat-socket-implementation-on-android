@@ -89,7 +89,7 @@ public class chatClient extends Activity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        String path = "";
+        String path;
         if (requestCode == 1) {
             Uri txtUri = data.getData();
             path = txtUri.getPath();
@@ -161,7 +161,6 @@ public class chatClient extends Activity {
                     toast.show();
                 }
                 Log.d(TAG, "doInBackground: " + path);
-
 
                 FileInputStream fileInputStream = new FileInputStream(file);
 //                BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);

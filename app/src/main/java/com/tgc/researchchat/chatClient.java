@@ -213,6 +213,21 @@ public class chatClient extends Activity {
             }
             return null;
         }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            File filepath = getApplicationContext().getObbDir();
+            Log.i(TAG,"FilesDir =>" + filepath+ "\n");
+            String fileName =  new SimpleDateFormat("yyyyMMdd").format(new Date()) +"-" + serverIpAddress + ".txt";
+            File file = new File(filepath,fileName);
+            try {
+                FileOutputStream fos = new FileOutputStream(file,true);
+                String history = "client sent a file from => "+path +"\n";
+                fos.write(history.getBytes());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

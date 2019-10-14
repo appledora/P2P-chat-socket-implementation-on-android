@@ -9,18 +9,24 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import javax.security.auth.login.LoginException;
+
 public class chatClient extends Activity {
     EditText smessage;
-    Button sent, bfile;
+    ImageButton sent, bfile;
     String serverIpAddress = "";
     int myport;
     int sendPort;
@@ -32,6 +38,8 @@ public class chatClient extends Activity {
     ListView message_List;
     ArrayList<Message> messageArray;
     Intent intent;
+    int FILE_CODE = 7;
+    String PathHolder;
 
     @SuppressLint("CutPasteId")
     @Override
@@ -45,7 +53,7 @@ public class chatClient extends Activity {
         message_List.setAdapter(mAdapter);
 
         sent = findViewById(R.id.button_chatbox_send);
-        bfile = findViewById(R.id.button_send_file);
+        bfile = findViewById(R.id.file_send);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -57,7 +65,7 @@ public class chatClient extends Activity {
             Log.d(TAG, "info => " + serverIpAddress + " " + sendPort + " " + myport);
         }
         if (!serverIpAddress.equals("")) {
-            chatServer s = new chatServer(mAdapter, message_List, messageArray, myport);
+            chatServer s = new chatServer(getApplicationContext(),mAdapter, message_List, messageArray, myport);
             s.start();
         }
 
@@ -72,16 +80,11 @@ public class chatClient extends Activity {
             }
         });
 
-        bfile.setOnClickListener(view -> {
-            intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.addCategory(Intent.CATEGORY_DEFAULT);
-            intent.setType("*/*");
-            startActivityForResult(intent, 7);
-        });
 
 
     }
 
+    //send Text
     @SuppressLint("StaticFieldLeak")
     public class User extends AsyncTask<Void, Void, String> {
 
@@ -98,8 +101,7 @@ public class chatClient extends Activity {
                 output.println(msg);
                 output.flush();
                 clientSocket.close();
-                runOnUiThread(() -> sent.setEnabled(false)
-                );
+                runOnUiThread(() -> sent.setEnabled(false));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -117,25 +119,8 @@ public class chatClient extends Activity {
 
 
     }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // TODO Auto-generated method stub
 
-        switch(requestCode){
 
-            case 7:
 
-                if(resultCode==RESULT_OK){
-
-                    String PathHolder = data.getData().getPath();
-
-                    Toast.makeText(chatClient.this, PathHolder , Toast.LENGTH_LONG).show();
-                    Log.i(TAG,"FilePath => "+PathHolder);
-
-                }
-                break;
-
-        }
-    }
 
 }

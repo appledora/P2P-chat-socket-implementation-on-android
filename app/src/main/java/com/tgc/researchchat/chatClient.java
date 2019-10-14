@@ -1,17 +1,22 @@
 package com.tgc.researchchat;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -27,7 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class chatClient extends Activity {
+public class chatClient extends AppCompatActivity {
     EditText smessage;
     ImageButton sent;
     String serverIpAddress = "";
@@ -49,12 +54,15 @@ public class chatClient extends Activity {
         setContentView(R.layout.activity_chatbox);
         smessage = findViewById(R.id.edittext_chatbox);
         message_List = findViewById(R.id.message_list);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        sent = findViewById(R.id.button_chatbox_send);
+        fileUp = findViewById(R.id.file_send);
+
+        setSupportActionBar(toolbar);
+
         messageArray = new ArrayList<>();
         mAdapter = new ChatAdapter(this, messageArray);
         message_List.setAdapter(mAdapter);
-
-        sent = findViewById(R.id.button_chatbox_send);
-        fileUp = findViewById(R.id.file_send);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -64,6 +72,9 @@ public class chatClient extends Activity {
             sendPort = Integer.parseInt(infos[1]);
             myport = Integer.parseInt(infos[2]);
         }
+
+        getSupportActionBar().setTitle("Connection to " + serverIpAddress);
+
         if (!serverIpAddress.equals("")) {
             chatServer s = new chatServer(getApplicationContext(), mAdapter, message_List, messageArray, myport,serverIpAddress);
             s.start();
@@ -90,6 +101,24 @@ public class chatClient extends Activity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         String path;
@@ -102,6 +131,7 @@ public class chatClient extends Activity {
             new fileTransfer(arrOfStr[1]).execute();
         }
     }
+
 
     @SuppressLint("StaticFieldLeak")
     public class User extends AsyncTask<Void, Void, String> {
@@ -213,6 +243,7 @@ public class chatClient extends Activity {
 
         @Override
         protected void onPostExecute(String name) {
+            Log.d(TAG, "onPostExecute: " + name);
             File filepath = getApplicationContext().getObbDir();
             Log.i(TAG, "FilesDir =>" + filepath + "\n");
             String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
@@ -224,10 +255,14 @@ public class chatClient extends Activity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            messageArray.add(new Message("New File Sent:" + name, 0));
-            message_List.setAdapter(mAdapter);
-            smessage.setText("");
+            if (!name.isEmpty()) {
+                messageArray.add(new Message("New File Sent: " + name, 0));
+                message_List.setAdapter(mAdapter);
+                smessage.setText("");
+            } else {
+                Toast toast = Toast.makeText(getApplicationContext(), "File cannot be sent. No Internet Connection", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }
     }
 

@@ -25,13 +25,14 @@ public class fileServer extends Thread {
     private ArrayList<Message> messageArray;
     private ChatAdapter mAdapter;
     private int port;
-
-    fileServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port) {
+String serverIpAddress;
+    fileServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port,String serverIpAddress) {
         this.messageArray = messageArray;
         this.messageList = messageList;
         this.mAdapter = mAdapter;
         this.port = port;
         this.context = context;
+        this.serverIpAddress = serverIpAddress;
     }
 
     public void run() {

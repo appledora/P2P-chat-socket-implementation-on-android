@@ -8,12 +8,15 @@ import android.widget.ListView;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class chatServer extends Thread {
 
@@ -24,13 +27,15 @@ public class chatServer extends Thread {
     private ChatAdapter mAdapter;
     Context context;
     private int port;
+    String serverIpAddress;
 
-    chatServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port) {
+    chatServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port,String serverIpAddress) {
         this.messageArray = messageArray;
         this.messageList = messageList;
         this.mAdapter = mAdapter;
         this.port = port;
         this.context = context;
+        this.serverIpAddress = serverIpAddress;
     }
 
     public void run() {
@@ -69,6 +74,17 @@ public class chatServer extends Thread {
                 stringBuilder.deleteCharAt(0);
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
+                File path = context.getObbDir();
+                Log.i(TAG,"FilesDir =>" + path+ "\n");
+                String fileName =  new SimpleDateFormat("yyyyMMdd").format(new Date()) +"-" + serverIpAddress + ".txt";
+                File file = new File(path,fileName);
+                try {
+                    FileOutputStream fos = new FileOutputStream(file,true);
+                    String history = "server: " +result+"\n";
+                    fos.write(history.getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 messageArray.add(new Message(result, 1));
                 messageList.setAdapter(mAdapter);
             } else {

@@ -10,6 +10,7 @@ class Message {
     boolean isSent(){
         return type == 0;
     }
+
     String getMessage(){
         return message;
     }

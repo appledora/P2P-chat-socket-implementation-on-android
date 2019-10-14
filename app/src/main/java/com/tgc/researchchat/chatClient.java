@@ -13,7 +13,8 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -160,18 +161,37 @@ public class chatClient extends Activity {
                     toast.show();
                 }
                 Log.d(TAG, "doInBackground: " + path);
+
+
                 FileInputStream fileInputStream = new FileInputStream(file);
+//                BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
                 long fileSize = file.length();
                 byte[] byteArray = new byte[(int) fileSize];
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+
+                DataInputStream dataInputStream = new DataInputStream(fileInputStream);
+                dataInputStream.readFully(byteArray, 0, byteArray.length);
+
                 OutputStream outputStream = clientSocket.getOutputStream();
-                int transactionBytes = 0;
-                while ((transactionBytes = bufferedInputStream.read(byteArray, 0, byteArray.length)) != -1) {
-                    outputStream.write(byteArray, 0, byteArray.length);
-                    Log.d(TAG, "doInBackground: Transfering Bytes" + transactionBytes);
-                }
+
+                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                dataOutputStream.writeUTF(file.getName());
+                dataOutputStream.writeLong(byteArray.length);
+
+                dataOutputStream.write(byteArray, 0, byteArray.length);
+                dataOutputStream.flush();
+
+                outputStream.write(byteArray, 0, byteArray.length);
                 outputStream.flush();
-                bufferedInputStream.close();
+
+                outputStream.close();
+                dataOutputStream.close();
+//                int transactionBytes = 0;
+//                while ((transactionBytes = bufferedInputStream.read(byteArray, 0, byteArray.length)) != -1) {
+//                    outputStream.write(byteArray, 0, byteArray.length);
+//                    Log.d(TAG, "doInBackground: Transfering Bytes" + transactionBytes);
+//                }
+//                outputStream.flush();
+//                bufferedInputStream.close();
                 clientSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();

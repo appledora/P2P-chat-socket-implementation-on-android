@@ -6,12 +6,12 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ListView;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -61,21 +61,38 @@ public class fileServer extends Thread {
                 File testDirectory = new File(context.getObbDir(), "recordFolder");
                 if (!testDirectory.exists())
                     testDirectory.mkdirs();
-                File outputFile = new File(testDirectory, "recording1");
+//                File outputFile = new File(testDirectory, "recording1");
                 try {
-                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
-                    BufferedInputStream bufferedInputStream = new BufferedInputStream(sockets[0].getInputStream());
-                    byte[] byteArray = new byte[8192 * 16];
-                    int count;
-                    while ((count = bufferedInputStream.read(byteArray, 0, byteArray.length)) != -1) {
-                        outputStream.write(byteArray, 0, count);
-                    }
+//                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
+//                    BufferedInputStream bufferedInputStream = new BufferedInputStream(sockets[0].getInputStream());
+//                    byte[] byteArray = new byte[8192 * 16];
+//                    int count;
+//                    while ((count = bufferedInputStream.read(byteArray, 0, byteArray.length)) != -1) {
+//                        outputStream.write(byteArray, 0, count);
+//                    }
+//                    outputStream.flush();
+//                    outputStream.close();
+                    InputStream inputStream = sockets[0].getInputStream();
+                    DataInputStream dataInputStream = new DataInputStream(inputStream);
 
+                    String fileName = dataInputStream.readUTF();
+                    File outputFile = new File(testDirectory, fileName);
+
+                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));
+                    long fileSize = dataInputStream.readLong();
+                    int bytesRead;
+                    byte[] byteArray = new byte[8192 * 16];
+
+                    while (fileSize > 0 && (bytesRead = dataInputStream.read(byteArray, 0, (int) Math.min(byteArray.length, fileSize))) != -1) {
+                        outputStream.write(byteArray, 0, bytesRead);
+                        fileSize -= bytesRead;
+                    }
+                    inputStream.close();
+                    dataInputStream.close();
                     outputStream.flush();
                     outputStream.close();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             } catch (Exception e) {

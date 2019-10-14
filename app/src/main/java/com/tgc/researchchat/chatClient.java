@@ -1,7 +1,11 @@
 package com.tgc.researchchat;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,6 +21,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.OnColorSelectedListener;
+import com.flask.colorpicker.builder.ColorPickerClickListener;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -76,14 +85,14 @@ public class chatClient extends AppCompatActivity {
         getSupportActionBar().setTitle("Connection to " + serverIpAddress);
 
         if (!serverIpAddress.equals("")) {
-            chatServer s = new chatServer(getApplicationContext(), mAdapter, message_List, messageArray, myport,serverIpAddress);
+            chatServer s = new chatServer(this, getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress);
             s.start();
             fileServer f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport,serverIpAddress);
             f.start();
         }
         sent.setOnClickListener(v -> {
             if (!smessage.getText().toString().isEmpty()) {
-                User user = new User();
+                User user = new User("1:" + smessage.getText().toString());
                 user.execute();
             } else {
                 Toast toast = Toast.makeText(getApplicationContext(), "Please write something", Toast.LENGTH_SHORT);
@@ -111,8 +120,36 @@ public class chatClient extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.action_settings:
-                return true;
+            case R.id.action_settings: {
+                final Context context = chatClient.this;
+                ColorPickerDialogBuilder
+                        .with(context)
+                        .setTitle("Choose color")
+                        .initialColor(0xffffffff)
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
+                        .density(12)
+                        .setOnColorSelectedListener(new OnColorSelectedListener() {
+                            @Override
+                            public void onColorSelected(int selectedColor) {
+                            }
+                        })
+                        .setPositiveButton("ok", new ColorPickerClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
+                                changeBackgroundColor(selectedColor);
+                                User user = new User("2:" + Integer.toHexString(selectedColor));
+                                user.execute();
+                                Log.d("ColorPicker", "onColorChanged: 0x" + Integer.toHexString(selectedColor));
+                            }
+                        })
+                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .build()
+                        .show();
+            }
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -132,13 +169,20 @@ public class chatClient extends AppCompatActivity {
         }
     }
 
+    public final void changeBackgroundColor(Integer selectedColor) {
+        LayerDrawable layerDrawable = (LayerDrawable) message_List.getBackground();
+        GradientDrawable gradientDrawable = (GradientDrawable) layerDrawable.findDrawableByLayerId(R.id.shapeColor);
+        gradientDrawable.setColor(selectedColor);
+    }
 
     @SuppressLint("StaticFieldLeak")
+
     public class User extends AsyncTask<Void, Void, String> {
+        String msg;
 
-        String nmsg = smessage.getText().toString();
-        String msg = "1:" + nmsg;
-
+        User(String message) {
+            msg = message;
+        }
         @Override
         protected String doInBackground(Void... voids) {
             try {
@@ -162,24 +206,25 @@ public class chatClient extends AppCompatActivity {
             runOnUiThread(() -> sent.setEnabled(true));
             Log.i(TAG, "on post execution result => " + result);
             StringBuilder stringBuilder = new StringBuilder(result);
-            stringBuilder.deleteCharAt(0);
-            stringBuilder.deleteCharAt(0);
-            result = stringBuilder.toString();
-            File path = getApplicationContext().getObbDir();
-            Log.i(TAG,"FilesDir =>" + path+ "\n");
-            String fileName =  new SimpleDateFormat("yyyyMMdd").format(new Date()) +"-" + serverIpAddress + ".txt";
-            File file = new File(path,fileName);
-            try {
-                FileOutputStream fos = new FileOutputStream(file,true);
-                String history = "client: " +result+"\n";
-                fos.write(history.getBytes());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (stringBuilder.charAt(0) == '1' && stringBuilder.charAt(1) == ':') {
+                stringBuilder.deleteCharAt(0);
+                stringBuilder.deleteCharAt(0);
+                result = stringBuilder.toString();
+                File path = getApplicationContext().getObbDir();
+                Log.i(TAG, "FilesDir =>" + path + "\n");
+                String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
+                File file = new File(path, fileName);
+                try {
+                    FileOutputStream fos = new FileOutputStream(file, true);
+                    String history = "client: " + result + "\n";
+                    fos.write(history.getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                messageArray.add(new Message(result, 0));
+                message_List.setAdapter(mAdapter);
+                smessage.setText("");
             }
-            messageArray.add(new Message(result, 0));
-            message_List.setAdapter(mAdapter);
-            smessage.setText("");
-
         }
 
 

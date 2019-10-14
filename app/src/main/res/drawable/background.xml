@@ -1,5 +1,16 @@
-<bitmap
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/back"
-    android:tileMode="repeat"
-    android:dither="true" />
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/back"></bitmap>
+
+    </item>
+
+    <item android:id="@+id/shapeColor">
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+
+</layer-list>

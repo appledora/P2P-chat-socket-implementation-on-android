@@ -154,7 +154,9 @@ public class chatClient extends Activity {
             int portr = sendPort + 1;
             try {
                 Socket clientSocket = new Socket(ipadd, portr);
-
+                if (path.charAt(0) != '/') {
+                    path = "/storage/emulated/0/" + path;
+                }
                 File file = new File(path);
                 if (path.isEmpty()) {
                     Toast toast = Toast.makeText(getApplicationContext(), "Path is empty", Toast.LENGTH_SHORT);

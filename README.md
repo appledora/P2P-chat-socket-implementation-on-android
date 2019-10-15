@@ -19,6 +19,12 @@ ADDITIONAL FEATURES:
 5. Users can control background color opacity.
 
 
+Be careful to :
+1. Always double check the IP address and port numbers.
+2. Upload file from actual file location in the device, and not shortcuts.
+3. Restart the app if the internet connection is reset.
+
+
 
 
 

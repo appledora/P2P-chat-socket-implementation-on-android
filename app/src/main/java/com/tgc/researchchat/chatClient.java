@@ -15,8 +15,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,7 +59,7 @@ public class chatClient extends AppCompatActivity {
     fileServer f;
     String ownIp;
     Toolbar toolbar;
-
+    ProgressBar progressBar;
     private Boolean exit = false;
     private RecyclerView mMessageRecycler;
     private ChatAdapterRecycler mMessageAdapter;
@@ -73,6 +75,7 @@ public class chatClient extends AppCompatActivity {
         sent = findViewById(R.id.button_chatbox_send);
         fileUp = findViewById(R.id.file_send);
         textView = findViewById(R.id.textView);
+        progressBar = findViewById(R.id.pbHeaderProgress);
 
         setSupportActionBar(toolbar);
 
@@ -268,6 +271,9 @@ public class chatClient extends AppCompatActivity {
 
         @Override
         protected String doInBackground(Void... voids) {
+            runOnUiThread(() -> {
+                progressBar.setVisibility(View.VISIBLE);
+            });
             String filenameX = "";
             String ipadd = serverIpAddress;
             int portr = sendPort + 1;
@@ -318,6 +324,9 @@ public class chatClient extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String name) {
+            runOnUiThread(() -> {
+                progressBar.setVisibility(View.GONE);
+            });
             Log.d(TAG, "onPostExecute: " + name);
             File filepath = getApplicationContext().getObbDir();
             Log.i(TAG, "FilesDir =>" + filepath + "\n");

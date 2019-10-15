@@ -11,6 +11,8 @@ import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,22 +22,22 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class chatServer extends Thread {
 
+    private Context context;
+    private String serverIpAddress;
+    private Activity activity;
+    private String ownIp;
     private String TAG = "CHATSERVER";
-
-    private ListView messageList;
+    private RecyclerView messageList;
     private ArrayList<Message> messageArray;
-    private ChatAdapter mAdapter;
-    Context context;
+    private ChatAdapterRecycler mAdapter;
     private int port;
-    String serverIpAddress;
-    Activity activity;
-    String ownIp;
 
-    chatServer(String ownIp, Activity activity, Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
+    chatServer(String ownIp, Activity activity, Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
         this.ownIp = ownIp;
         this.messageArray = messageArray;
         this.messageList = messageList;
@@ -46,6 +48,7 @@ public class chatServer extends Thread {
         this.activity = activity;
     }
 
+    @SuppressLint("SetTextI18n")
     public void run() {
         try {
             ServerSocket initSocket = new ServerSocket(port);
@@ -69,6 +72,7 @@ public class chatServer extends Thread {
             e.printStackTrace();
         }
     }
+
     @SuppressLint("StaticFieldLeak")
     public class ReadFromClient extends AsyncTask<Socket, Void, String> {
         String text;
@@ -84,6 +88,7 @@ public class chatServer extends Thread {
             }
             return text;
         }
+
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
             if (result.charAt(0) == '1' && result.charAt(1) == ':') {
@@ -92,17 +97,17 @@ public class chatServer extends Thread {
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
                 File path = context.getObbDir();
-                Log.i(TAG,"FilesDir =>" + path+ "\n");
-                String fileName =  new SimpleDateFormat("yyyyMMdd").format(new Date()) +"-" + serverIpAddress + ".txt";
-                File file = new File(path,fileName);
+                Log.i(TAG, "FilesDir =>" + path + "\n");
+                @SuppressLint("SimpleDateFormat") String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
+                File file = new File(path, fileName);
                 try {
-                    FileOutputStream fos = new FileOutputStream(file,true);
-                    String history = "server: " +result+"\n";
+                    FileOutputStream fos = new FileOutputStream(file, true);
+                    String history = "server: " + result + "\n";
                     fos.write(history.getBytes());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                messageArray.add(new Message(result, 1));
+                messageArray.add(new Message(result, 1, Calendar.getInstance().getTime()));
                 messageList.setAdapter(mAdapter);
             } else {
                 StringBuilder stringBuilder = new StringBuilder(result);

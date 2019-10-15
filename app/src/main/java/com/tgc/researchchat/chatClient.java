@@ -15,15 +15,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
@@ -36,25 +38,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class chatClient extends AppCompatActivity {
+    String TAG = "CLIENT ACTIVITY";
+
     EditText smessage;
     ImageButton sent;
     String serverIpAddress = "";
     int myport;
     int sendPort;
-    ServerSocket serverSocket;
-    Handler handler = new Handler();
-    String TAG = "CLIENT ACTIVITY";
-    String tempS;
-    public static ChatAdapter mAdapter;
-    public  static com.tgc.researchchat.ImageAdapter iAdapter;
-    ListView message_List;
     ArrayList<Message> messageArray;
     ArrayList<MyFiles> filesArray;
     ImageButton fileUp;
@@ -62,31 +59,43 @@ public class chatClient extends AppCompatActivity {
     chatServer s;
     fileServer f;
     String ownIp;
+    Toolbar toolbar;
+    ProgressBar progressBar;
     private Boolean exit = false;
+    private RecyclerView mMessageRecycler;
+    private ChatAdapterRecycler mMessageAdapter;
+    private ImageAdapter imageAdapter;
+
     @SuppressLint("CutPasteId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbox);
+
         smessage = findViewById(R.id.edittext_chatbox);
-        message_List = findViewById(R.id.message_list);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         sent = findViewById(R.id.button_chatbox_send);
         fileUp = findViewById(R.id.file_send);
         textView = findViewById(R.id.textView);
-
+        progressBar = (ProgressBar) findViewById(R.id.pbHeaderProgress);
         setSupportActionBar(toolbar);
 
         messageArray = new ArrayList<>();
         filesArray = new ArrayList<>();
-        mAdapter = new ChatAdapter(this, messageArray);
-        iAdapter = new com.tgc.researchchat.ImageAdapter(this, filesArray);
-        message_List.setAdapter(mAdapter);
-        message_List.setAdapter(iAdapter);
+        mMessageRecycler = findViewById(R.id.message_list);
+        mMessageAdapter = new ChatAdapterRecycler(this, messageArray);
+        imageAdapter = new ImageAdapter(this.getApplicationContext(), filesArray);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        layoutManager.setStackFromEnd(true);
+        layoutManager.setSmoothScrollbarEnabled(true);
+
+        mMessageRecycler.setLayoutManager(layoutManager);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             String info = bundle.getString("ip&port");
+            assert info != null;
             String[] infos = info.split(" ");
             serverIpAddress = infos[0];
             sendPort = Integer.parseInt(infos[1]);
@@ -98,9 +107,9 @@ public class chatClient extends AppCompatActivity {
         getSupportActionBar().setTitle("Connection to " + serverIpAddress);
 
         if (!serverIpAddress.equals("")) {
-            s = new chatServer(ownIp, this, getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress);
+            s = new chatServer(ownIp, this, getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress);
             s.start();
-            f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress,filesArray,iAdapter);
+            f = new fileServer(getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress,imageAdapter,filesArray);
             f.start();
         }
         sent.setOnClickListener(v -> {
@@ -131,32 +140,28 @@ public class chatClient extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.action_settings: {
-                final Context context = chatClient.this;
-                ColorPickerDialogBuilder
-                        .with(context)
-                        .setTitle("Choose color")
-                        .initialColor(0xffffffff)
-                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
-                        .density(12)
-                        .setOnColorSelectedListener(selectedColor -> {
-                        })
-                        .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
-                            changeBackgroundColor(selectedColor);
-                            User user = new User("2:" + Integer.toHexString(selectedColor));
-                            user.execute();
-                            Log.d("ColorPicker", "onColorChanged: 0x" + Integer.toHexString(selectedColor));
-                        })
-                        .setNegativeButton("cancel", (dialog, which) -> {
-                        })
-                        .build()
-                        .show();
-            }
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_settings) {
+            final Context context = chatClient.this;
+            ColorPickerDialogBuilder
+                    .with(context)
+                    .setTitle("Choose color")
+                    .initialColor(0xffffffff)
+                    .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
+                    .density(12)
+                    .setOnColorSelectedListener(selectedColor -> {
+                    })
+                    .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
+                        changeBackgroundColor(selectedColor);
+                        User user = new User("2:" + Integer.toHexString(selectedColor));
+                        user.execute();
+                        Log.d("ColorPicker", "onColorChanged: 0x" + Integer.toHexString(selectedColor));
+                    })
+                    .setNegativeButton("cancel", (dialog, which) -> {
+                    })
+                    .build()
+                    .show();
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -164,24 +169,43 @@ public class chatClient extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         String path;
         if (requestCode == 1) {
-            Uri txtUri = data.getData();
-            path = txtUri.getPath();
-            Log.d(TAG, "onActivityResult: " + path);
-            String[] arrOfStr = path.split(":");
-            if (arrOfStr.length > 1) {
-                Log.d(TAG, "onActivityResult: Textual " + path);
-                new fileTransfer(arrOfStr[1]).execute();
-            } else {
-                Log.d(TAG, "onActivityResult: Image " + path);
-                new fileTransfer(arrOfStr[0]).execute();
+            try {
+                Uri txtUri = data.getData();
+                path = txtUri.getPath();
+                Log.d(TAG, "onActivityResult: " + path);
+                String[] arrOfStr = path.split(":");
+                if (arrOfStr.length > 1) {
+                    Log.d(TAG, "onActivityResult: Textual " + path);
+                    new fileTransfer(arrOfStr[1]).execute();
+                } else {
+                    Log.d(TAG, "onActivityResult: Image " + path);
+                    new fileTransfer(arrOfStr[0]).execute();
+                }
+            } catch (NullPointerException e) {
+                Log.d(TAG, "onActivityResult: No File Selected");
             }
         }
     }
 
     public final void changeBackgroundColor(Integer selectedColor) {
-        LayerDrawable layerDrawable = (LayerDrawable) message_List.getBackground();
+        LayerDrawable layerDrawable = (LayerDrawable) mMessageRecycler.getBackground();
         GradientDrawable gradientDrawable = (GradientDrawable) layerDrawable.findDrawableByLayerId(R.id.shapeColor);
         gradientDrawable.setColor(selectedColor);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (exit) {
+            s.interrupt();
+            f.interrupt();
+            finish();
+        } else {
+            Toast.makeText(this, "Press Back again to Exit.",
+                    Toast.LENGTH_SHORT).show();
+            exit = true;
+            new Handler().postDelayed(() -> exit = false, 3 * 1000);
+
+        }
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -192,6 +216,7 @@ public class chatClient extends AppCompatActivity {
         User(String message) {
             msg = message;
         }
+
         @Override
         protected String doInBackground(Void... voids) {
             try {
@@ -230,8 +255,8 @@ public class chatClient extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                messageArray.add(new Message(result, 0));
-                message_List.setAdapter(mAdapter);
+                messageArray.add(new Message(result, 0, Calendar.getInstance().getTime()));
+                mMessageRecycler.setAdapter(mMessageAdapter);
                 smessage.setText("");
             }
         }
@@ -239,6 +264,7 @@ public class chatClient extends AppCompatActivity {
 
     }
 
+    @SuppressLint("StaticFieldLeak")
     class fileTransfer extends AsyncTask<Void, Integer, String> {
         String path;
 
@@ -248,6 +274,9 @@ public class chatClient extends AppCompatActivity {
 
         @Override
         protected String doInBackground(Void... voids) {
+            runOnUiThread(() -> {
+                progressBar.setVisibility(View.VISIBLE);
+            });
             String filenameX = "";
             String ipadd = serverIpAddress;
             int portr = sendPort + 1;
@@ -280,6 +309,7 @@ public class chatClient extends AppCompatActivity {
 
                 filenameX = file.getName();
 
+
                 dataOutputStream.write(byteArray, 0, byteArray.length);
                 dataOutputStream.flush();
 
@@ -298,6 +328,9 @@ public class chatClient extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String name) {
+            runOnUiThread(() -> {
+                progressBar.setVisibility(View.GONE);
+            });
             Log.d(TAG, "onPostExecute: " + name);
             File filepath = getApplicationContext().getObbDir();
             Log.i(TAG, "FilesDir =>" + filepath + "\n");
@@ -311,33 +344,18 @@ public class chatClient extends AppCompatActivity {
                 e.printStackTrace();
             }
             if (!name.isEmpty()) {
-                messageArray.add(new Message("New File Sent: " + name, 0));
-                filesArray.add(new MyFiles(path,0));
-                message_List.setAdapter(mAdapter);
-                message_List.setAdapter(iAdapter);
+                messageArray.add(new Message("New File Sent: " + name, 0, Calendar.getInstance().getTime()));
+                mMessageRecycler.setAdapter(mMessageAdapter);
+                if(name.contains("jpg") || name.contains("jpeg") || name.contains("png")){
+                    System.out.println(TAG + " image Adapter added");
+                    filesArray.add(new MyFiles(path,0,Calendar.getInstance().getTime()));
+                    mMessageRecycler.setAdapter(imageAdapter);
+                }
                 smessage.setText("");
             } else {
-                Toast toast = Toast.makeText(getApplicationContext(), "File Not Found.", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), "File Sending Error.", Toast.LENGTH_SHORT);
                 toast.show();
             }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (exit) {
-            finish(); // finish activity
-        } else {
-            Toast.makeText(this, "Press Back again to Exit.",
-                    Toast.LENGTH_SHORT).show();
-            exit = true;
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    exit = false;
-                }
-            }, 3 * 1000);
-
         }
     }
 }

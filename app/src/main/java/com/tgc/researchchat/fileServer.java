@@ -4,7 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ListView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -17,28 +18,30 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class fileServer extends Thread {
 
-    Context context;
+    private Context context;
+    private String serverIpAddress;
     private String TAG = "FILE SERVER";
-    private ListView messageList;
+    private RecyclerView messageList;
     private ArrayList<Message> messageArray;
-    private ArrayList<MyFiles> filesArray;
-    private ChatAdapter mAdapter;
-    private ImageAdapter iAdapter;
+    private  ArrayList<MyFiles> filesArray;
+    private ChatAdapterRecycler mAdapter;
+    private ImageAdapter imageAdapter;
     private int port;
-String serverIpAddress;
-    fileServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port,String serverIpAddress, ArrayList<MyFiles> filesArray, ImageAdapter iAdapter){
+
+    fileServer(Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress, ImageAdapter imageAdapter, ArrayList<MyFiles> filesArray) {
         this.messageArray = messageArray;
         this.messageList = messageList;
+        this.filesArray = filesArray;
         this.mAdapter = mAdapter;
         this.port = port;
         this.context = context;
         this.serverIpAddress = serverIpAddress;
-        this.filesArray = filesArray;
-        this.iAdapter = iAdapter;
+        this.imageAdapter = imageAdapter;
     }
 
     public void run() {
@@ -66,7 +69,7 @@ String serverIpAddress;
         @Override
         protected String doInBackground(Socket... sockets) {
             try {
-                File testDirectory = new File(context.getObbDir(), "recordFolder");
+                File testDirectory = new File(context.getObbDir(), "downloadFolder");
                 if (!testDirectory.exists())
                     testDirectory.mkdirs();
                 try {
@@ -102,14 +105,18 @@ String serverIpAddress;
 
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
-            String directory = context.getObbDir() +"/recordFolder/" + result;
-            System.out.println("IMAGE DIRECTORY => " + directory);
-            messageArray.add(new Message("New File Received: " + result, 1));
-            filesArray.add(new MyFiles(directory,1));
+            messageArray.add(new Message("New File Received: " + result, 1, Calendar.getInstance().getTime()));
             messageList.setAdapter(mAdapter);
-            messageList.setAdapter(iAdapter);
+            if(result.contains("jpg") || result.contains("jpeg") || result.contains("png")){
+                System.out.println(TAG + " image Adapter added");
+                String directory = context.getObbDir() +"/downloadFolder/" + result;
+                System.out.println("IMAGE DIRECTORY => " + directory);
+                filesArray.add(new MyFiles(directory,1,Calendar.getInstance().getTime()));
+                messageList.setAdapter(imageAdapter);
+            }
             File filepath = context.getObbDir();
             Log.i(TAG, "FilesDir =>" + filepath + "\n");
+            @SuppressLint("SimpleDateFormat")
             String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
             File file = new File(filepath, fileName);
             try {

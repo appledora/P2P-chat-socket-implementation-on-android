@@ -1,15 +1,19 @@
 package com.tgc.researchchat;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
@@ -28,27 +32,40 @@ public class chatServer extends Thread {
     Context context;
     private int port;
     String serverIpAddress;
+    Activity activity;
+    String ownIp;
 
-    chatServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port,String serverIpAddress) {
+    chatServer(String ownIp, Activity activity, Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
+        this.ownIp = ownIp;
         this.messageArray = messageArray;
         this.messageList = messageList;
         this.mAdapter = mAdapter;
         this.port = port;
         this.context = context;
         this.serverIpAddress = serverIpAddress;
+        this.activity = activity;
     }
 
     public void run() {
         try {
             ServerSocket initSocket = new ServerSocket(port);
             initSocket.setReuseAddress(true);
+            TextView textView;
+            textView = activity.findViewById(R.id.textView);
+            textView.setText("Server Socket Started at IP: " + ownIp + " and Port: " + port);
+            textView.setBackgroundColor(Color.parseColor("#39FF14"));
             System.out.println(TAG + "started");
-            while (true) {
+            while (!Thread.interrupted()) {
                 Socket connectSocket = initSocket.accept();
                 ReadFromClient handle = new ReadFromClient();
                 handle.execute(connectSocket);
             }
+            initSocket.close();
         } catch (IOException e) {
+            TextView textView;
+            textView = activity.findViewById(R.id.textView);
+            textView.setText("Server Socket initialization failed. Port already in use.");
+            textView.setBackgroundColor(Color.parseColor("#FF0800"));
             e.printStackTrace();
         }
     }
@@ -88,19 +105,17 @@ public class chatServer extends Thread {
                 messageArray.add(new Message(result, 1));
                 messageList.setAdapter(mAdapter);
             } else {
-                try {
-                    Log.i(TAG, "else cause");
-                    File file = new File(context.getObbDir(), "testfile.txt");
-                    Log.i(TAG, "FIle dir => " + file);
-                    FileWriter writer = new FileWriter(file);
-                    writer.append(result);
-                    writer.flush();
-                    writer.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                StringBuilder stringBuilder = new StringBuilder(result);
+                stringBuilder.deleteCharAt(0);
+                stringBuilder.deleteCharAt(0);
+                result = stringBuilder.toString();
+                ListView message_List;
+                message_List = activity.findViewById(R.id.message_list);
+                LayerDrawable layerDrawable = (LayerDrawable) message_List.getBackground();
+                GradientDrawable gradientDrawable = (GradientDrawable) layerDrawable.findDrawableByLayerId(R.id.shapeColor);
+                gradientDrawable.setColor(Color.parseColor("#" + result));
             }
         }
     }
+
 }

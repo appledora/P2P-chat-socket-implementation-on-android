@@ -1,17 +1,32 @@
 package com.tgc.researchchat;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.format.Formatter;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -27,7 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class chatClient extends Activity {
+public class chatClient extends AppCompatActivity {
     EditText smessage;
     ImageButton sent;
     String serverIpAddress = "";
@@ -38,10 +53,16 @@ public class chatClient extends Activity {
     String TAG = "CLIENT ACTIVITY";
     String tempS;
     public static ChatAdapter mAdapter;
+    public  static com.tgc.researchchat.ImageAdapter iAdapter;
     ListView message_List;
     ArrayList<Message> messageArray;
+    ArrayList<MyFiles> filesArray;
     ImageButton fileUp;
-
+    TextView textView;
+    chatServer s;
+    fileServer f;
+    String ownIp;
+    private Boolean exit = false;
     @SuppressLint("CutPasteId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +70,19 @@ public class chatClient extends Activity {
         setContentView(R.layout.activity_chatbox);
         smessage = findViewById(R.id.edittext_chatbox);
         message_List = findViewById(R.id.message_list);
-        messageArray = new ArrayList<>();
-        mAdapter = new ChatAdapter(this, messageArray);
-        message_List.setAdapter(mAdapter);
-
+        Toolbar toolbar = findViewById(R.id.toolbar);
         sent = findViewById(R.id.button_chatbox_send);
         fileUp = findViewById(R.id.file_send);
+        textView = findViewById(R.id.textView);
+
+        setSupportActionBar(toolbar);
+
+        messageArray = new ArrayList<>();
+        filesArray = new ArrayList<>();
+        mAdapter = new ChatAdapter(this, messageArray);
+        iAdapter = new com.tgc.researchchat.ImageAdapter(this, filesArray);
+        message_List.setAdapter(mAdapter);
+        message_List.setAdapter(iAdapter);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -64,15 +92,20 @@ public class chatClient extends Activity {
             sendPort = Integer.parseInt(infos[1]);
             myport = Integer.parseInt(infos[2]);
         }
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        ownIp = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+
+        getSupportActionBar().setTitle("Connection to " + serverIpAddress);
+
         if (!serverIpAddress.equals("")) {
-            chatServer s = new chatServer(getApplicationContext(), mAdapter, message_List, messageArray, myport,serverIpAddress);
+            s = new chatServer(ownIp, this, getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress);
             s.start();
-            fileServer f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport,serverIpAddress);
+            f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress,filesArray,iAdapter);
             f.start();
         }
         sent.setOnClickListener(v -> {
             if (!smessage.getText().toString().isEmpty()) {
-                User user = new User();
+                User user = new User("1:" + smessage.getText().toString());
                 user.execute();
             } else {
                 Toast toast = Toast.makeText(getApplicationContext(), "Please write something", Toast.LENGTH_SHORT);
@@ -83,10 +116,47 @@ public class chatClient extends Activity {
         fileUp.setOnClickListener(v -> {
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            intent.setType("text/*");
+            intent.setType("*/*");
             startActivityForResult(Intent.createChooser(intent, "Select file"), 1);
         });
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.action_settings: {
+                final Context context = chatClient.this;
+                ColorPickerDialogBuilder
+                        .with(context)
+                        .setTitle("Choose color")
+                        .initialColor(0xffffffff)
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
+                        .density(12)
+                        .setOnColorSelectedListener(selectedColor -> {
+                        })
+                        .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
+                            changeBackgroundColor(selectedColor);
+                            User user = new User("2:" + Integer.toHexString(selectedColor));
+                            user.execute();
+                            Log.d("ColorPicker", "onColorChanged: 0x" + Integer.toHexString(selectedColor));
+                        })
+                        .setNegativeButton("cancel", (dialog, which) -> {
+                        })
+                        .build()
+                        .show();
+            }
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -98,17 +168,30 @@ public class chatClient extends Activity {
             path = txtUri.getPath();
             Log.d(TAG, "onActivityResult: " + path);
             String[] arrOfStr = path.split(":");
-            Log.d(TAG, "onActivityResult: " + arrOfStr[1]);
-            new fileTransfer(arrOfStr[1]).execute();
+            if (arrOfStr.length > 1) {
+                Log.d(TAG, "onActivityResult: Textual " + path);
+                new fileTransfer(arrOfStr[1]).execute();
+            } else {
+                Log.d(TAG, "onActivityResult: Image " + path);
+                new fileTransfer(arrOfStr[0]).execute();
+            }
         }
     }
 
+    public final void changeBackgroundColor(Integer selectedColor) {
+        LayerDrawable layerDrawable = (LayerDrawable) message_List.getBackground();
+        GradientDrawable gradientDrawable = (GradientDrawable) layerDrawable.findDrawableByLayerId(R.id.shapeColor);
+        gradientDrawable.setColor(selectedColor);
+    }
+
     @SuppressLint("StaticFieldLeak")
+
     public class User extends AsyncTask<Void, Void, String> {
+        String msg;
 
-        String nmsg = smessage.getText().toString();
-        String msg = "1:" + nmsg;
-
+        User(String message) {
+            msg = message;
+        }
         @Override
         protected String doInBackground(Void... voids) {
             try {
@@ -132,24 +215,25 @@ public class chatClient extends Activity {
             runOnUiThread(() -> sent.setEnabled(true));
             Log.i(TAG, "on post execution result => " + result);
             StringBuilder stringBuilder = new StringBuilder(result);
-            stringBuilder.deleteCharAt(0);
-            stringBuilder.deleteCharAt(0);
-            result = stringBuilder.toString();
-            File path = getApplicationContext().getObbDir();
-            Log.i(TAG,"FilesDir =>" + path+ "\n");
-            String fileName =  new SimpleDateFormat("yyyyMMdd").format(new Date()) +"-" + serverIpAddress + ".txt";
-            File file = new File(path,fileName);
-            try {
-                FileOutputStream fos = new FileOutputStream(file,true);
-                String history = "client: " +result+"\n";
-                fos.write(history.getBytes());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (stringBuilder.charAt(0) == '1' && stringBuilder.charAt(1) == ':') {
+                stringBuilder.deleteCharAt(0);
+                stringBuilder.deleteCharAt(0);
+                result = stringBuilder.toString();
+                File path = getApplicationContext().getObbDir();
+                Log.i(TAG, "FilesDir =>" + path + "\n");
+                String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
+                File file = new File(path, fileName);
+                try {
+                    FileOutputStream fos = new FileOutputStream(file, true);
+                    String history = "client: " + result + "\n";
+                    fos.write(history.getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                messageArray.add(new Message(result, 0));
+                message_List.setAdapter(mAdapter);
+                smessage.setText("");
             }
-            messageArray.add(new Message(result, 0));
-            message_List.setAdapter(mAdapter);
-            smessage.setText("");
-
         }
 
 
@@ -172,6 +256,7 @@ public class chatClient extends Activity {
                 if (path.charAt(0) != '/') {
                     path = "/storage/emulated/0/" + path;
                 }
+                Log.d(TAG, "doInBackground: Storage Here " + path);
                 File file = new File(path);
                 if (path.isEmpty()) {
                     Toast toast = Toast.makeText(getApplicationContext(), "Path is empty", Toast.LENGTH_SHORT);
@@ -213,6 +298,7 @@ public class chatClient extends Activity {
 
         @Override
         protected void onPostExecute(String name) {
+            Log.d(TAG, "onPostExecute: " + name);
             File filepath = getApplicationContext().getObbDir();
             Log.i(TAG, "FilesDir =>" + filepath + "\n");
             String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
@@ -224,11 +310,34 @@ public class chatClient extends Activity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            messageArray.add(new Message("New File Sent:" + name, 0));
-            message_List.setAdapter(mAdapter);
-            smessage.setText("");
+            if (!name.isEmpty()) {
+                messageArray.add(new Message("New File Sent: " + name, 0));
+                filesArray.add(new MyFiles(path,0));
+                message_List.setAdapter(mAdapter);
+                message_List.setAdapter(iAdapter);
+                smessage.setText("");
+            } else {
+                Toast toast = Toast.makeText(getApplicationContext(), "File Not Found.", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (exit) {
+            finish(); // finish activity
+        } else {
+            Toast.makeText(this, "Press Back again to Exit.",
+                    Toast.LENGTH_SHORT).show();
+            exit = true;
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    exit = false;
+                }
+            }, 3 * 1000);
+
+        }
+    }
 }

@@ -25,16 +25,20 @@ public class fileServer extends Thread {
     private String TAG = "FILE SERVER";
     private ListView messageList;
     private ArrayList<Message> messageArray;
+    private ArrayList<MyFiles> filesArray;
     private ChatAdapter mAdapter;
+    private ImageAdapter iAdapter;
     private int port;
 String serverIpAddress;
-    fileServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port,String serverIpAddress) {
+    fileServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port,String serverIpAddress, ArrayList<MyFiles> filesArray, ImageAdapter iAdapter){
         this.messageArray = messageArray;
         this.messageList = messageList;
         this.mAdapter = mAdapter;
         this.port = port;
         this.context = context;
         this.serverIpAddress = serverIpAddress;
+        this.filesArray = filesArray;
+        this.iAdapter = iAdapter;
     }
 
     public void run() {
@@ -43,12 +47,13 @@ String serverIpAddress;
             Log.d(TAG, "run: " + fileSocket.getLocalPort());
             fileSocket.setReuseAddress(true);
             System.out.println(TAG + "started");
-            while (true) {
+            while (!Thread.interrupted()) {
                 Socket connectFileSocket = fileSocket.accept();
                 Log.d(TAG, "run: File Opened");
                 fileFromClient handleFile = new fileFromClient();
                 handleFile.execute(connectFileSocket);
             }
+            fileSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -97,8 +102,12 @@ String serverIpAddress;
 
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
+            String directory = context.getObbDir() +"/recordFolder/" + result;
+            System.out.println("IMAGE DIRECTORY => " + directory);
             messageArray.add(new Message("New File Received: " + result, 1));
+            filesArray.add(new MyFiles(directory,1));
             messageList.setAdapter(mAdapter);
+            messageList.setAdapter(iAdapter);
             File filepath = context.getObbDir();
             Log.i(TAG, "FilesDir =>" + filepath + "\n");
             String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";

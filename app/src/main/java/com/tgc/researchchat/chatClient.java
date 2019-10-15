@@ -2,7 +2,6 @@ package com.tgc.researchchat;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
@@ -26,8 +25,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.OnColorSelectedListener;
-import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
 import java.io.DataInputStream;
@@ -138,24 +135,15 @@ public class chatClient extends AppCompatActivity {
                         .initialColor(0xffffffff)
                         .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
                         .density(12)
-                        .setOnColorSelectedListener(new OnColorSelectedListener() {
-                            @Override
-                            public void onColorSelected(int selectedColor) {
-                            }
+                        .setOnColorSelectedListener(selectedColor -> {
                         })
-                        .setPositiveButton("ok", new ColorPickerClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
-                                changeBackgroundColor(selectedColor);
-                                User user = new User("2:" + Integer.toHexString(selectedColor));
-                                user.execute();
-                                Log.d("ColorPicker", "onColorChanged: 0x" + Integer.toHexString(selectedColor));
-                            }
+                        .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
+                            changeBackgroundColor(selectedColor);
+                            User user = new User("2:" + Integer.toHexString(selectedColor));
+                            user.execute();
+                            Log.d("ColorPicker", "onColorChanged: 0x" + Integer.toHexString(selectedColor));
                         })
-                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
+                        .setNegativeButton("cancel", (dialog, which) -> {
                         })
                         .build()
                         .show();
@@ -321,7 +309,7 @@ public class chatClient extends AppCompatActivity {
                 message_List.setAdapter(mAdapter);
                 smessage.setText("");
             } else {
-                Toast toast = Toast.makeText(getApplicationContext(), "File cannot be sent. No Internet Connection", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), "File Not Found.", Toast.LENGTH_SHORT);
                 toast.show();
             }
         }

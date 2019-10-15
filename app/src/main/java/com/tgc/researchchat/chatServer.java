@@ -11,6 +11,8 @@ import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,22 +22,23 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class chatServer extends Thread {
 
     private String TAG = "CHATSERVER";
 
-    private ListView messageList;
+    private RecyclerView messageList;
     private ArrayList<Message> messageArray;
-    private ChatAdapter mAdapter;
+    private ChatAdapterRecycler mAdapter;
     Context context;
     private int port;
     String serverIpAddress;
     Activity activity;
     String ownIp;
 
-    chatServer(String ownIp, Activity activity, Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
+    chatServer(String ownIp, Activity activity, Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
         this.ownIp = ownIp;
         this.messageArray = messageArray;
         this.messageList = messageList;
@@ -102,7 +105,7 @@ public class chatServer extends Thread {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                messageArray.add(new Message(result, 1));
+                messageArray.add(new Message(result, 1, Calendar.getInstance().getTime()));
                 messageList.setAdapter(mAdapter);
             } else {
                 StringBuilder stringBuilder = new StringBuilder(result);

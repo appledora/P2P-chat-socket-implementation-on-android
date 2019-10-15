@@ -17,12 +17,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
@@ -39,6 +40,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class chatClient extends AppCompatActivity {
@@ -51,8 +53,6 @@ public class chatClient extends AppCompatActivity {
     Handler handler = new Handler();
     String TAG = "CLIENT ACTIVITY";
     String tempS;
-    public static ChatAdapter mAdapter;
-    ListView message_List;
     ArrayList<Message> messageArray;
     ImageButton fileUp;
     TextView textView;
@@ -60,13 +60,16 @@ public class chatClient extends AppCompatActivity {
     fileServer f;
     String ownIp;
     private Boolean exit = false;
+    private RecyclerView mMessageRecycler;
+    private ChatAdapterRecycler mMessageAdapter;
+
     @SuppressLint("CutPasteId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbox);
+
         smessage = findViewById(R.id.edittext_chatbox);
-        message_List = findViewById(R.id.message_list);
         Toolbar toolbar = findViewById(R.id.toolbar);
         sent = findViewById(R.id.button_chatbox_send);
         fileUp = findViewById(R.id.file_send);
@@ -75,8 +78,14 @@ public class chatClient extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         messageArray = new ArrayList<>();
-        mAdapter = new ChatAdapter(this, messageArray);
-        message_List.setAdapter(mAdapter);
+        mMessageRecycler = findViewById(R.id.message_list);
+        mMessageAdapter = new ChatAdapterRecycler(this, messageArray);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.VERTICAL);
+        ((LinearLayoutManager) layoutManager).setStackFromEnd(true);
+        ((LinearLayoutManager) layoutManager).setSmoothScrollbarEnabled(true);
+
+        mMessageRecycler.setLayoutManager(layoutManager);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -92,9 +101,9 @@ public class chatClient extends AppCompatActivity {
         getSupportActionBar().setTitle("Connection to " + serverIpAddress);
 
         if (!serverIpAddress.equals("")) {
-            s = new chatServer(ownIp, this, getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress);
+            s = new chatServer(ownIp, this, getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress);
             s.start();
-            f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress);
+            f = new fileServer(getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress);
             f.start();
         }
         sent.setOnClickListener(v -> {
@@ -173,7 +182,7 @@ public class chatClient extends AppCompatActivity {
     }
 
     public final void changeBackgroundColor(Integer selectedColor) {
-        LayerDrawable layerDrawable = (LayerDrawable) message_List.getBackground();
+        LayerDrawable layerDrawable = (LayerDrawable) mMessageRecycler.getBackground();
         GradientDrawable gradientDrawable = (GradientDrawable) layerDrawable.findDrawableByLayerId(R.id.shapeColor);
         gradientDrawable.setColor(selectedColor);
     }
@@ -224,8 +233,8 @@ public class chatClient extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                messageArray.add(new Message(result, 0));
-                message_List.setAdapter(mAdapter);
+                messageArray.add(new Message(result, 0, Calendar.getInstance().getTime()));
+                mMessageRecycler.setAdapter(mMessageAdapter);
                 smessage.setText("");
             }
         }
@@ -305,8 +314,8 @@ public class chatClient extends AppCompatActivity {
                 e.printStackTrace();
             }
             if (!name.isEmpty()) {
-                messageArray.add(new Message("New File Sent: " + name, 0));
-                message_List.setAdapter(mAdapter);
+                messageArray.add(new Message("New File Sent: " + name, 0, Calendar.getInstance().getTime()));
+                mMessageRecycler.setAdapter(mMessageAdapter);
                 smessage.setText("");
             } else {
                 Toast toast = Toast.makeText(getApplicationContext(), "File Not Found.", Toast.LENGTH_SHORT);

@@ -4,7 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ListView;
+
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -17,18 +18,20 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class fileServer extends Thread {
 
     Context context;
     private String TAG = "FILE SERVER";
-    private ListView messageList;
+    private RecyclerView messageList;
     private ArrayList<Message> messageArray;
-    private ChatAdapter mAdapter;
+    private ChatAdapterRecycler mAdapter;
     private int port;
 String serverIpAddress;
-    fileServer(Context context, ChatAdapter mAdapter, ListView messageList, ArrayList<Message> messageArray, int port,String serverIpAddress) {
+
+    fileServer(Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
         this.messageArray = messageArray;
         this.messageList = messageList;
         this.mAdapter = mAdapter;
@@ -98,7 +101,7 @@ String serverIpAddress;
 
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
-            messageArray.add(new Message("New File Received: " + result, 1));
+            messageArray.add(new Message("New File Received: " + result, 1, Calendar.getInstance().getTime()));
             messageList.setAdapter(mAdapter);
             File filepath = context.getObbDir();
             Log.i(TAG, "FilesDir =>" + filepath + "\n");

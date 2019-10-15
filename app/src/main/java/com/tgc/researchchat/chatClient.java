@@ -24,6 +24,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 
@@ -52,7 +53,7 @@ public class chatClient extends AppCompatActivity {
     String TAG = "CLIENT ACTIVITY";
     String tempS;
     public static ChatAdapter mAdapter;
-    public static com.tgc.researchchat.ImageAdapter iAdapter;
+    public  static com.tgc.researchchat.ImageAdapter iAdapter;
     ListView message_List;
     ArrayList<Message> messageArray;
     ArrayList<MyFiles> filesArray;
@@ -62,7 +63,6 @@ public class chatClient extends AppCompatActivity {
     fileServer f;
     String ownIp;
     private Boolean exit = false;
-
     @SuppressLint("CutPasteId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +100,7 @@ public class chatClient extends AppCompatActivity {
         if (!serverIpAddress.equals("")) {
             s = new chatServer(ownIp, this, getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress);
             s.start();
-            f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress, filesArray, iAdapter);
+            f = new fileServer(getApplicationContext(), mAdapter, message_List, messageArray, myport, serverIpAddress,filesArray,iAdapter);
             f.start();
         }
         sent.setOnClickListener(v -> {
@@ -192,7 +192,6 @@ public class chatClient extends AppCompatActivity {
         User(String message) {
             msg = message;
         }
-
         @Override
         protected String doInBackground(Void... voids) {
             try {
@@ -313,7 +312,7 @@ public class chatClient extends AppCompatActivity {
             }
             if (!name.isEmpty()) {
                 messageArray.add(new Message("New File Sent: " + name, 0));
-                filesArray.add(new MyFiles(path, 0));
+                filesArray.add(new MyFiles(path,0));
                 message_List.setAdapter(mAdapter);
                 message_List.setAdapter(iAdapter);
                 smessage.setText("");

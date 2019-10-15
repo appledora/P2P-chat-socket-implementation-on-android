@@ -167,16 +167,20 @@ public class chatClient extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         String path;
         if (requestCode == 1) {
-            Uri txtUri = data.getData();
-            path = txtUri.getPath();
-            Log.d(TAG, "onActivityResult: " + path);
-            String[] arrOfStr = path.split(":");
-            if (arrOfStr.length > 1) {
-                Log.d(TAG, "onActivityResult: Textual " + path);
-                new fileTransfer(arrOfStr[1]).execute();
-            } else {
-                Log.d(TAG, "onActivityResult: Image " + path);
-                new fileTransfer(arrOfStr[0]).execute();
+            try {
+                Uri txtUri = data.getData();
+                path = txtUri.getPath();
+                Log.d(TAG, "onActivityResult: " + path);
+                String[] arrOfStr = path.split(":");
+                if (arrOfStr.length > 1) {
+                    Log.d(TAG, "onActivityResult: Textual " + path);
+                    new fileTransfer(arrOfStr[1]).execute();
+                } else {
+                    Log.d(TAG, "onActivityResult: Image " + path);
+                    new fileTransfer(arrOfStr[0]).execute();
+                }
+            } catch (NullPointerException e) {
+                Log.d(TAG, "onActivityResult: No File Selected");
             }
         }
     }
@@ -240,6 +244,19 @@ public class chatClient extends AppCompatActivity {
         }
 
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (exit) {
+            finish(); // finish activity
+        } else {
+            Toast.makeText(this, "Press Back again to Exit.",
+                    Toast.LENGTH_SHORT).show();
+            exit = true;
+            new Handler().postDelayed(() -> exit = false, 3 * 1000);
+
+        }
     }
 
     class fileTransfer extends AsyncTask<Void, Integer, String> {
@@ -318,27 +335,9 @@ public class chatClient extends AppCompatActivity {
                 mMessageRecycler.setAdapter(mMessageAdapter);
                 smessage.setText("");
             } else {
-                Toast toast = Toast.makeText(getApplicationContext(), "File Not Found.", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), "File Sending Error.", Toast.LENGTH_SHORT);
                 toast.show();
             }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (exit) {
-            finish(); // finish activity
-        } else {
-            Toast.makeText(this, "Press Back again to Exit.",
-                    Toast.LENGTH_SHORT).show();
-            exit = true;
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    exit = false;
-                }
-            }, 3 * 1000);
-
         }
     }
 }

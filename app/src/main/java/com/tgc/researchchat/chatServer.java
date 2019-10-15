@@ -74,8 +74,6 @@ public class chatServer extends Thread {
                 stringBuilder.deleteCharAt(0);
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
-
-
                 File path = context.getObbDir();
                 Log.i(TAG,"FilesDir =>" + path+ "\n");
                 String fileName =  new SimpleDateFormat("yyyyMMdd").format(new Date()) +"-" + serverIpAddress + ".txt";

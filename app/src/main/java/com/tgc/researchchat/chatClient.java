@@ -13,10 +13,10 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,7 +25,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 public class chatClient extends Activity {
@@ -84,7 +83,7 @@ public class chatClient extends Activity {
         fileUp.setOnClickListener(v -> {
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            intent.setType("*/*");
+            intent.setType("text/*");
             startActivityForResult(Intent.createChooser(intent, "Select file"), 1);
         });
 
@@ -93,7 +92,7 @@ public class chatClient extends Activity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        String path = "";
+        String path;
         if (requestCode == 1) {
             Uri txtUri = data.getData();
             path = txtUri.getPath();
@@ -136,7 +135,6 @@ public class chatClient extends Activity {
             stringBuilder.deleteCharAt(0);
             stringBuilder.deleteCharAt(0);
             result = stringBuilder.toString();
-
             File path = getApplicationContext().getObbDir();
             Log.i(TAG,"FilesDir =>" + path+ "\n");
             String fileName =  new SimpleDateFormat("yyyyMMdd").format(new Date()) +"-" + serverIpAddress + ".txt";
@@ -148,7 +146,6 @@ public class chatClient extends Activity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
             messageArray.add(new Message(result, 0));
             message_List.setAdapter(mAdapter);
             smessage.setText("");
@@ -158,7 +155,7 @@ public class chatClient extends Activity {
 
     }
 
-    class fileTransfer extends AsyncTask<Void, Integer, Integer> {
+    class fileTransfer extends AsyncTask<Void, Integer, String> {
         String path;
 
         fileTransfer(String path) {
@@ -166,51 +163,71 @@ public class chatClient extends Activity {
         }
 
         @Override
-        protected Integer doInBackground(Void... voids) {
+        protected String doInBackground(Void... voids) {
+            String filenameX = "";
             String ipadd = serverIpAddress;
             int portr = sendPort + 1;
             try {
                 Socket clientSocket = new Socket(ipadd, portr);
-
+                if (path.charAt(0) != '/') {
+                    path = "/storage/emulated/0/" + path;
+                }
                 File file = new File(path);
                 if (path.isEmpty()) {
                     Toast toast = Toast.makeText(getApplicationContext(), "Path is empty", Toast.LENGTH_SHORT);
                     toast.show();
                 }
                 Log.d(TAG, "doInBackground: " + path);
+
                 FileInputStream fileInputStream = new FileInputStream(file);
+
                 long fileSize = file.length();
                 byte[] byteArray = new byte[(int) fileSize];
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-                OutputStream outputStream = clientSocket.getOutputStream();
-                int transactionBytes = 0;
-                while ((transactionBytes = bufferedInputStream.read(byteArray, 0, byteArray.length)) != -1) {
-                    outputStream.write(byteArray, 0, byteArray.length);
-                    Log.d(TAG, "doInBackground: Transfering Bytes" + transactionBytes);
-                }
 
+                DataInputStream dataInputStream = new DataInputStream(fileInputStream);
+                dataInputStream.readFully(byteArray, 0, byteArray.length);
+
+                OutputStream outputStream = clientSocket.getOutputStream();
+
+                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+                dataOutputStream.writeUTF(file.getName());
+                dataOutputStream.writeLong(byteArray.length);
+
+                filenameX = file.getName();
+
+                dataOutputStream.write(byteArray, 0, byteArray.length);
+                dataOutputStream.flush();
+
+                outputStream.write(byteArray, 0, byteArray.length);
                 outputStream.flush();
-                bufferedInputStream.close();
+
+                outputStream.close();
+                dataOutputStream.close();
+
                 clientSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
+            return filenameX;
         }
 
         @Override
-        protected void onPostExecute(Integer integer) {
-        /*    File filepath = getApplicationContext().getObbDir();
-            Log.i(TAG,"FilesDir =>" + filepath+ "\n");
-            String fileName =  new SimpleDateFormat("yyyyMMdd").format(new Date()) +"-" + serverIpAddress + ".txt";
-            File file = new File(filepath,fileName);
+        protected void onPostExecute(String name) {
+            File filepath = getApplicationContext().getObbDir();
+            Log.i(TAG, "FilesDir =>" + filepath + "\n");
+            String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
+            File file = new File(filepath, fileName);
             try {
-                FileOutputStream fos = new FileOutputStream(file,true);
-                String history = "client sent a file from => "+path +"\n";
+                FileOutputStream fos = new FileOutputStream(file, true);
+                String history = "client sent a file from => " + path + "\n";
                 fos.write(history.getBytes());
             } catch (Exception e) {
                 e.printStackTrace();
-            }*/
+            }
+
+            messageArray.add(new Message("New File Sent:" + name, 0));
+            message_List.setAdapter(mAdapter);
+            smessage.setText("");
         }
     }
 

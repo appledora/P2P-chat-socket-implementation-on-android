@@ -116,12 +116,9 @@ public class ImageAdapter extends RecyclerView.Adapter {
             System.out.println("Sent Image holder: file directory => " + directory);
             File imgFile = new File(directory);
             if (imgFile.exists()) {
-
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-
                 sentImage.setImageBitmap(myBitmap);
                 sentImage.setVisibility(View.VISIBLE);
-
             }
             timeText.setText(currentDateTimeString);
         }

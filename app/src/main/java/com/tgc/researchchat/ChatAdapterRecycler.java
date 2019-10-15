@@ -71,14 +71,14 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
             super(itemView);
             messageText = (TextView) itemView.findViewById(R.id.text_message_body);
             timeText = (TextView) itemView.findViewById(R.id.text_message_time);
-            nameText = (TextView) itemView.findViewById(R.id.text_message_name);
         }
 
         void bind(Message message) {
-            messageText.setText(message.getMessage());
-            timeText.setText("Random");
-            nameText.setText("Some Name");
+            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+            String currentDateTimeString = sdf.format(message.getTime());
 
+            messageText.setText(message.getMessage());
+            timeText.setText(currentDateTimeString);
         }
     }
 

@@ -23,13 +23,13 @@ import java.util.Date;
 
 public class fileServer extends Thread {
 
-    Context context;
+    private Context context;
+    private String serverIpAddress;
     private String TAG = "FILE SERVER";
     private RecyclerView messageList;
     private ArrayList<Message> messageArray;
     private ChatAdapterRecycler mAdapter;
     private int port;
-String serverIpAddress;
 
     fileServer(Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
         this.messageArray = messageArray;
@@ -105,6 +105,7 @@ String serverIpAddress;
             messageList.setAdapter(mAdapter);
             File filepath = context.getObbDir();
             Log.i(TAG, "FilesDir =>" + filepath + "\n");
+            @SuppressLint("SimpleDateFormat")
             String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
             File file = new File(filepath, fileName);
             try {

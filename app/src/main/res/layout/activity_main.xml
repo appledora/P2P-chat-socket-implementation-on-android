@@ -30,30 +30,31 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvP2P" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/Main"
         android:layout_width="310dp"
         android:layout_height="357dp"
+        android:background="#FFF"
+        android:paddingStart="10dp"
+        android:paddingTop="30dp"
+        android:paddingEnd="10dp"
         app:layout_constraintBottom_toTopOf="@id/connectButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivP2P"
-        android:paddingTop="30dp"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:background="#FFF"
-        >
+        app:layout_constraintTop_toBottomOf="@id/ivP2P">
+
         <TextView
             android:id="@+id/tvIp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingStart="15dp"
             android:text="@string/your_ip"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:textColor="@color/colorPrimary"
             android:textSize="11sp"
-            android:paddingStart="15dp"
-            />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/showIPtextId"
             android:layout_width="match_parent"
@@ -86,10 +87,9 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
-                android:textAlignment="center"
-                android:inputType = "number"
+                android:inputType="number"
                 android:text="5000"
-                />
+                android:textAlignment="center" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -101,6 +101,7 @@
             android:theme="@style/TextLabel"
             app:layout_constraintBottom_toTopOf="@id/textinpIp"
             app:layout_constraintTop_toBottomOf="@id/textinpOwnIP">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ipEditText"
                 android:layout_width="match_parent"
@@ -109,11 +110,10 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
-                android:textAlignment="center"
-                android:inputType = "number"
                 android:digits="0123456789."
+                android:inputType="number"
                 android:text="192.168.0."
-                />
+                android:textAlignment="center" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -135,13 +135,14 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
-                android:textAlignment="center"
-                android:inputType = "number"
+                android:inputType="number"
                 android:text="5000"
+                android:textAlignment="center"
 
                 />
         </com.google.android.material.textfield.TextInputLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <Button
         android:id="@+id/connectButton"
         android:layout_width="match_parent"

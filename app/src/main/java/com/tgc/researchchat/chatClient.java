@@ -36,7 +36,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,21 +43,21 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class chatClient extends AppCompatActivity {
+    String TAG = "CLIENT ACTIVITY";
+
     EditText smessage;
     ImageButton sent;
     String serverIpAddress = "";
     int myport;
     int sendPort;
-    ServerSocket serverSocket;
-    Handler handler = new Handler();
-    String TAG = "CLIENT ACTIVITY";
-    String tempS;
     ArrayList<Message> messageArray;
     ImageButton fileUp;
     TextView textView;
     chatServer s;
     fileServer f;
     String ownIp;
+    Toolbar toolbar;
+
     private Boolean exit = false;
     private RecyclerView mMessageRecycler;
     private ChatAdapterRecycler mMessageAdapter;
@@ -70,7 +69,7 @@ public class chatClient extends AppCompatActivity {
         setContentView(R.layout.activity_chatbox);
 
         smessage = findViewById(R.id.edittext_chatbox);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         sent = findViewById(R.id.button_chatbox_send);
         fileUp = findViewById(R.id.file_send);
         textView = findViewById(R.id.textView);
@@ -80,16 +79,17 @@ public class chatClient extends AppCompatActivity {
         messageArray = new ArrayList<>();
         mMessageRecycler = findViewById(R.id.message_list);
         mMessageAdapter = new ChatAdapterRecycler(this, messageArray);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        ((LinearLayoutManager) layoutManager).setOrientation(LinearLayoutManager.VERTICAL);
-        ((LinearLayoutManager) layoutManager).setStackFromEnd(true);
-        ((LinearLayoutManager) layoutManager).setSmoothScrollbarEnabled(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        layoutManager.setStackFromEnd(true);
+        layoutManager.setSmoothScrollbarEnabled(true);
 
         mMessageRecycler.setLayoutManager(layoutManager);
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             String info = bundle.getString("ip&port");
+            assert info != null;
             String[] infos = info.split(" ");
             serverIpAddress = infos[0];
             sendPort = Integer.parseInt(infos[1]);
@@ -134,32 +134,28 @@ public class chatClient extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.action_settings: {
-                final Context context = chatClient.this;
-                ColorPickerDialogBuilder
-                        .with(context)
-                        .setTitle("Choose color")
-                        .initialColor(0xffffffff)
-                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
-                        .density(12)
-                        .setOnColorSelectedListener(selectedColor -> {
-                        })
-                        .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
-                            changeBackgroundColor(selectedColor);
-                            User user = new User("2:" + Integer.toHexString(selectedColor));
-                            user.execute();
-                            Log.d("ColorPicker", "onColorChanged: 0x" + Integer.toHexString(selectedColor));
-                        })
-                        .setNegativeButton("cancel", (dialog, which) -> {
-                        })
-                        .build()
-                        .show();
-            }
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_settings) {
+            final Context context = chatClient.this;
+            ColorPickerDialogBuilder
+                    .with(context)
+                    .setTitle("Choose color")
+                    .initialColor(0xffffffff)
+                    .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
+                    .density(12)
+                    .setOnColorSelectedListener(selectedColor -> {
+                    })
+                    .setPositiveButton("ok", (dialog, selectedColor, allColors) -> {
+                        changeBackgroundColor(selectedColor);
+                        User user = new User("2:" + Integer.toHexString(selectedColor));
+                        user.execute();
+                        Log.d("ColorPicker", "onColorChanged: 0x" + Integer.toHexString(selectedColor));
+                    })
+                    .setNegativeButton("cancel", (dialog, which) -> {
+                    })
+                    .build()
+                    .show();
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -191,6 +187,21 @@ public class chatClient extends AppCompatActivity {
         gradientDrawable.setColor(selectedColor);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (exit) {
+            s.interrupt();
+            f.interrupt();
+            finish();
+        } else {
+            Toast.makeText(this, "Press Back again to Exit.",
+                    Toast.LENGTH_SHORT).show();
+            exit = true;
+            new Handler().postDelayed(() -> exit = false, 3 * 1000);
+
+        }
+    }
+
     @SuppressLint("StaticFieldLeak")
 
     public class User extends AsyncTask<Void, Void, String> {
@@ -199,6 +210,7 @@ public class chatClient extends AppCompatActivity {
         User(String message) {
             msg = message;
         }
+
         @Override
         protected String doInBackground(Void... voids) {
             try {
@@ -246,19 +258,7 @@ public class chatClient extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onBackPressed() {
-        if (exit) {
-            finish(); // finish activity
-        } else {
-            Toast.makeText(this, "Press Back again to Exit.",
-                    Toast.LENGTH_SHORT).show();
-            exit = true;
-            new Handler().postDelayed(() -> exit = false, 3 * 1000);
-
-        }
-    }
-
+    @SuppressLint("StaticFieldLeak")
     class fileTransfer extends AsyncTask<Void, Integer, String> {
         String path;
 

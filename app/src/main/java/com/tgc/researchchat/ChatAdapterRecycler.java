@@ -114,18 +114,41 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
 
     private class SentMessageHolder extends RecyclerView.ViewHolder {
         TextView messageText, timeText;
-
+        ImageView messageImage;
         SentMessageHolder(View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.send_message_body);
             timeText = itemView.findViewById(R.id.text_message_time);
+            messageImage = itemView.findViewById(R.id.sent_image);
         }
 
         void bind(Message message) {
+            String newMessage = message.getMessage();
             SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
             String currentDateTimeString = sdf.format(message.getTime());
 
-            messageText.setText(message.getMessage());
+            if (message.getMessage().contains("New File Sent: ") &&
+                    (message.getMessage().contains("png") ||
+                            message.getMessage().contains("jpg") ||
+                            message.getMessage().contains("jpeg"))) {
+                String[] fileName = message.getMessage().split(":");
+                Log.d(TAG, "bind: Received Message" + fileName[2]);
+                String[] newStringArr = newMessage.split(":");
+                newMessage = newStringArr[0] + newStringArr[1];
+                Log.d(TAG, "bind: Directory:" + newMessage);
+                String directory = newStringArr[2];
+                Log.d(TAG, "bind: Print Directory:" + directory);
+                File imgFile = new File(directory);
+                if (imgFile.exists()) {
+                    Log.d(TAG, "bind: +Yeah Exists");
+                    Glide.with(context)
+                            .load(directory)
+                            .override(500, 500)
+                            .into(messageImage);
+                }
+            }
+
+            messageText.setText(newMessage);
             timeText.setText(currentDateTimeString);
         }
     }

@@ -28,20 +28,16 @@ public class fileServer extends Thread {
     private String TAG = "FILE SERVER";
     private RecyclerView messageList;
     private ArrayList<Message> messageArray;
-    private  ArrayList<MyFiles> filesArray;
     private ChatAdapterRecycler mAdapter;
-    private ImageAdapter imageAdapter;
     private int port;
 
-    fileServer(Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress, ImageAdapter imageAdapter, ArrayList<MyFiles> filesArray) {
+    fileServer(Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
         this.messageArray = messageArray;
         this.messageList = messageList;
-        this.filesArray = filesArray;
         this.mAdapter = mAdapter;
         this.port = port;
         this.context = context;
         this.serverIpAddress = serverIpAddress;
-        this.imageAdapter = imageAdapter;
     }
 
     public void run() {
@@ -107,19 +103,6 @@ public class fileServer extends Thread {
             Log.d(TAG, "onPostExecute: Result" + result);
             messageArray.add(new Message("New File Received: " + result, 1, Calendar.getInstance().getTime()));
             messageList.setAdapter(mAdapter);
-//            try {
-//                if (!result.isEmpty())
-//                    if (result.contains("jpg") || result.contains("jpeg") || result.contains("png")) {
-//                        System.out.println(TAG + " image Adapter added");
-//                        String directory = context.getObbDir() + "/downloadFolder/" + result;
-//                        System.out.println("IMAGE DIRECTORY => " + directory);
-//                        filesArray.add(new MyFiles(directory, 1, Calendar.getInstance().getTime()));
-//                        messageList.setAdapter(imageAdapter);
-//                    }
-//            }
-//            catch (NullPointerException e){
-//                e.printStackTrace();
-//            }
 
             File filepath = context.getObbDir();
             Log.i(TAG, "FilesDir =>" + filepath + "\n");

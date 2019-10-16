@@ -53,7 +53,6 @@ public class chatClient extends AppCompatActivity {
     int myport;
     int sendPort;
     ArrayList<Message> messageArray;
-    ArrayList<MyFiles> filesArray;
     ImageButton fileUp;
     TextView textView;
     chatServer s;
@@ -64,7 +63,6 @@ public class chatClient extends AppCompatActivity {
     private Boolean exit = false;
     private RecyclerView mMessageRecycler;
     private ChatAdapterRecycler mMessageAdapter;
-    private ImageAdapter imageAdapter;
 
     @SuppressLint("CutPasteId")
     @Override
@@ -81,10 +79,8 @@ public class chatClient extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         messageArray = new ArrayList<>();
-        filesArray = new ArrayList<>();
         mMessageRecycler = findViewById(R.id.message_list);
         mMessageAdapter = new ChatAdapterRecycler(this, messageArray);
-        imageAdapter = new ImageAdapter(this.getApplicationContext(), filesArray);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         layoutManager.setStackFromEnd(true);
@@ -109,7 +105,7 @@ public class chatClient extends AppCompatActivity {
         if (!serverIpAddress.equals("")) {
             s = new chatServer(ownIp, this, getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress);
             s.start();
-            f = new fileServer(getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress,imageAdapter,filesArray);
+            f = new fileServer(getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress);
             f.start();
         }
         sent.setOnClickListener(v -> {
@@ -344,13 +340,8 @@ public class chatClient extends AppCompatActivity {
                 e.printStackTrace();
             }
             if (!name.isEmpty()) {
-                messageArray.add(new Message("New File Sent: " + name, 0, Calendar.getInstance().getTime()));
+                messageArray.add(new Message("New File Sent: " + name + ":" + path, 0, Calendar.getInstance().getTime()));
                 mMessageRecycler.setAdapter(mMessageAdapter);
-                if(name.contains("jpg") || name.contains("jpeg") || name.contains("png")){
-                    System.out.println(TAG + " image Adapter added");
-                    filesArray.add(new MyFiles(path,0,Calendar.getInstance().getTime()));
-                    mMessageRecycler.setAdapter(imageAdapter);
-                }
                 smessage.setText("");
             } else {
                 Toast toast = Toast.makeText(getApplicationContext(), "File Sending Error.", Toast.LENGTH_SHORT);

@@ -1,103 +1,155 @@
-
-This is a P2P chat and simple file-sharing app, that connects two deivce on  the same network using IP address and port numbers. The app is written in JAVA for the android platform and requires both device to support SDK 21 & higher.
-We used native java socket libraries to create the network sockets. Additionally, color picker library was used to help with Background color changing process.
-
-This application fulfills all the base features of the assignment, as given below:
-1. Devices are connected as peers through IP address and port.
-2. An intuitive GUI to write, send and receive messages and use other features.
-3. Material menubar that with feature options as menuitems.
-4. Option to store current chat session.
-5. Option to change background color together with the connected device.
-6. Can send text files.
-
-
-ADDITIONAL FEATURES:
-1. Possible to send any types of files including .c, .xml, .png,.jpeg etc
-2. Sent and received images are shown on chat screen
-3. Time is attached with the sent and the received texts.
-4. Gives notifications if devices are disconnected.
-5. Users can control background color opacity.
-
-
-Be careful to :
-1. Always double check the IP address and port numbers.
-2. Upload file from actual file location in the device, and not shortcuts.
-3. Restart the app if the internet connection is reset.
-
-
 # Peer to Peer Chat
+
+  
 
 This is a peer to peer chat and file-sharing app, that connects two deivce on the same network using their IP address and designated port numbers.
 
+  
+
 ## Getting Started
 
+  
+  
 
 ### Prerequisites
 
-Your android version needs to be able to use SDK Version 21.0 or up to run this application. Also, you need to give it the storage permission manually for now.
+  
+
+User's android version needs to be Lolipop(5.0) or higher to run this application. Also, he needs to give it the storage permission manually for now.
+
+  
 
 ### Installing
 
-Download it from Github and compile the project using Android Studio to run this project in your mobile.  
+  
+
+Download it from Github and compile the project using Android Studio to run this project in an android device.
+
+  
 
 ## Running the application
 
-After the Application is launched you will presented with this screen where it will show your IP.
+  
 
- <p align="center" ><img src="https://i.imgur.com/CZLDVKI.png" width = "200" height = "400"/></p>
- 
-This requires you to put the IP address and Port address of your other peers and a port address on your side to be opened for communication. After entering necessary information, you will be taken to next screen where you will be presented with the chat screen.
+After the Application is launched user will bepresented with this screen where it will show the devices IP by default.
 
-### Break down into end to end tests
+  
 
-Explain what these tests test and why
+<p  align="center"  ><img  src="https://i.imgur.com/CZLDVKI.png"  width = "200"  height = "400"/></p>
 
-```
-Give an example
-```
+I
 
-### And coding style tests
+This requires user to put the IP address and Port address of other peer and a port address on user's side to be opened for communication. After entering necessary information, user will be taken to next screen where he will be presented with the chat screen.
 
-Explain what these tests test and why
+  
 
-```
-Give an example
-```
+#### About Chat Screen
 
-## Deployment
+This screen presents with a simple Interface. Here user can see who he is connected to and if serversocket is working properly on users end. User can send files of any type clicking the clip button. Here he will have to select the file he wants to send and it is suggested to select file by going to the root location and then find it out and select.
 
-Add additional notes about how to deploy this on a live system
 
+<p  align="center"  ><img  src="https://i.imgur.com/mXTPAJi.png"  width = "200"  height = "400"/></p>
+
+  
+
+After selecting the file, he will be able to see its name on the screen. And also, if the selected file is an image file, both the sender and the receiver will be able to see a thumbnail of image in line.
+
+<p  align="center"  ><img  src="https://i.imgur.com/wtvZ7xV.png"  width = "200"  height = "400"/></p>
+
+User can also change the shade of background and the opposite side should receive the same color too.
+
+<p  align="center"  ><img  src="https://i.imgur.com/YDOoKSU.png"  width = "200"  height = "400"/> <img  src="https://i.imgur.com/gTz7vQb.png"  width = "200"  height = "400"/></p>
+The chat history and all the received file will be stored at the obb directory.
+<p align="center"><figure><img  src="https://i.imgur.com/eI4Tqep.png"  width = "200"  height = "400"/> 
+    <figcaption>Chat History Snippet</figcaption>
+</figure></p>
+
+### Client Socket Code
+
+    public class User extends AsyncTask<Void, Void, String> {  
+      String msg;  
+      
+      User(String message) {  
+	      msg = message;  
+        }  
+      
+      @Override  
+      protected String doInBackground(Void... voids) {  
+      try {  
+      String ipadd = serverIpAddress;  
+                int portr = sendPort;  
+                Socket clientSocket = new Socket(ipadd, portr);  
+                OutputStream outToServer = clientSocket.getOutputStream();  
+                PrintWriter output = new PrintWriter(outToServer);  
+                output.println(msg);  
+                output.flush();  
+                clientSocket.close();  
+                runOnUiThread(() -> sent.setEnabled(false)  
+     );  
+            } catch (Exception e) {  
+      e.printStackTrace();  
+            }  
+      return msg;  
+        }  
+      
+      protected void onPostExecute(String result) {  
+      runOnUiThread(() -> sent.setEnabled(true));  
+            Log.i(TAG, "on post execution result => " + result);  
+            }  
+     }  
+      
+    }
+
+`
+
+### Server Socket Code
+
+      public void run() {  
+      try {  
+      ServerSocket initSocket = new ServerSocket(port);  
+            initSocket.setReuseAddress(true);  
+            TextView textView;  
+            textView = activity.findViewById(R.id.textView);  
+            textView.setText("Server Socket Started at IP: " + ownIp + " and Port: " + port);  
+            textView.setBackgroundColor(Color.parseColor("#39FF14"));  
+            System.out.println(TAG + "started");  
+            while (!Thread.interrupted()) {  
+      Socket connectSocket = initSocket.accept();  
+                ReadFromClient handle = new ReadFromClient();  
+                handle.execute(connectSocket);  
+            }  
+      initSocket.close();  
+        } catch (IOException e) {  
+      TextView textView;  
+            textView = activity.findViewById(R.id.textView);  
+            textView.setText("Server Socket initialization failed. Port already in use.");  
+            textView.setBackgroundColor(Color.parseColor("#FF0800"));  
+            e.printStackTrace();  
+        }  
+    }
+
+
+Also don't forget to restart app if the messaging is not functioning properly.
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
+* <a href="https://docs.oracle.com/javase/7/docs/api/java/net/Socket.html">Java Socket</a>
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+  
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+*  **NAZIA TASNIM**    [Appledora](https://github.com/appledora/)
 
-## License
+*  **ISTIAK SHIHAB**   [istiakshihab](https://github.com/istiakshihab)
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+  
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+  
 
+* [Manug Gond](https://github.com/3ZadeSSG)
 
+* [Quadflask](https://github.com/QuadFlask/colorpicker)
 
-
+* [Glide](https://github.com/bumptech/glide)

@@ -60,7 +60,7 @@ User can also change the shade of background and the opposite side should receiv
 
 <p  align="center"  ><img  src="https://i.imgur.com/YDOoKSU.png"  width = "200"  height = "400"/> <img  src="https://i.imgur.com/gTz7vQb.png"  width = "200"  height = "400"/></p>
 The chat history and all the received file will be stored at the obb directory.
-<p align="center"><img  src="https://i.imgur.com/eI4Tqep.png"  width = "200"  height = "400"/> 
+<p align="center"><img  src="https://i.imgur.com/3s7tXJh.png"  width = "200"  height = "400"/> 
 </figure></p>
 
 ### Client Socket Code

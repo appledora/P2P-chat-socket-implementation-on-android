@@ -30,39 +30,23 @@ Be careful to :
 This is a peer to peer chat and file-sharing app, that connects two deivce on the same network using their IP address and designated port numbers.
 
 ## Getting Started
- <p align="center" ><img src="https://i.imgur.com/CZLDVKI.png" width = "200" height = "400"/></p>
-This screen requires you to put the IP address and Port address of your other peers and a port address on your side to be opened for communication.
 
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
-
-```
-Give examples
-```
+Your android version needs to be able to use SDK Version 21.0 or up to run this application. Also, you need to give it the storage permission manually for now.
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
+Download it from Github and compile the project using Android Studio to run this project in your mobile.  
 
-Say what the step will be
+## Running the application
 
-```
-Give the example
-```
+After the Application is launched you will presented with this screen where it will show your IP.
 
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
+ <p align="center" ><img src="https://i.imgur.com/CZLDVKI.png" width = "200" height = "400"/></p>
+ 
+This requires you to put the IP address and Port address of your other peers and a port address on your side to be opened for communication. After entering necessary information, you will be taken to next screen where you will be presented with the chat screen.
 
 ### Break down into end to end tests
 

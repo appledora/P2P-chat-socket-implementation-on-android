@@ -5,6 +5,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,6 +24,8 @@ import static android.content.ContentValues.TAG;
 public class ChatAdapterRecycler extends RecyclerView.Adapter {
     private static final int VIEW_TYPE_MESSAGE_SENT = 1;
     private static final int VIEW_TYPE_MESSAGE_RECEIVED = 2;
+    private static final int LATEST_TYPE_MESSAGE_SENT = 3;
+    private static final int LATEST_TYPE_MESSAGE_RECEIVED = 4;
     private Context context;
     private ArrayList<Message> arrayList;
 
@@ -34,21 +38,36 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
     public int getItemViewType(int position) {
         Message message = arrayList.get(position);
 
-        if (message.isSent())
+        if (message.isSent() && position != arrayList.size() - 1)
             return VIEW_TYPE_MESSAGE_SENT;
-        else
+        else if (!message.isSent() && position != arrayList.size() - 1)
             return VIEW_TYPE_MESSAGE_RECEIVED;
+        else if (message.isSent() && position == arrayList.size() - 1)
+            return LATEST_TYPE_MESSAGE_SENT;
+        else if (!message.isSent() && position == arrayList.size() - 1)
+            return LATEST_TYPE_MESSAGE_RECEIVED;
+        return 0;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
+        Animation animation = AnimationUtils.loadAnimation(context, R.anim.slide_from_bottom);
+
         if (viewType == VIEW_TYPE_MESSAGE_SENT) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_sent, parent, false);
             return new SentMessageHolder(view);
         } else if (viewType == VIEW_TYPE_MESSAGE_RECEIVED) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_received, parent, false);
+            return new ReceivedMessageHolder(view);
+        } else if (viewType == LATEST_TYPE_MESSAGE_SENT) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_sent, parent, false);
+            view.startAnimation(animation);
+            return new SentMessageHolder(view);
+        } else if (viewType == LATEST_TYPE_MESSAGE_RECEIVED) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_received, parent, false);
+            view.startAnimation(animation);
             return new ReceivedMessageHolder(view);
         }
         return null;
@@ -63,6 +82,14 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
                 break;
             case VIEW_TYPE_MESSAGE_RECEIVED:
                 ((ReceivedMessageHolder) holder).bind(message);
+                break;
+            case LATEST_TYPE_MESSAGE_SENT:
+                ((SentMessageHolder) holder).bind(message);
+                break;
+            case LATEST_TYPE_MESSAGE_RECEIVED:
+                ((ReceivedMessageHolder) holder).bind(message);
+                break;
+
         }
     }
 
@@ -147,7 +174,6 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
                             .into(messageImage);
                 }
             }
-
             messageText.setText(newMessage);
             timeText.setText(currentDateTimeString);
         }

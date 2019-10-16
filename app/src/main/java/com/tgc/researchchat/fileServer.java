@@ -101,22 +101,24 @@ public class fileServer extends Thread {
 
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
-            messageArray.add(new Message("New File Received: " + result, 1, Calendar.getInstance().getTime()));
-            messageList.setAdapter(mAdapter);
+            if (result != null) {
+                messageArray.add(new Message("New File Received: " + result, 1, Calendar.getInstance().getTime()));
+                messageList.setAdapter(mAdapter);
 
-            File filepath = context.getObbDir();
-            Log.i(TAG, "FilesDir =>" + filepath + "\n");
-            @SuppressLint("SimpleDateFormat")
-            String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
-            File file = new File(filepath, fileName);
-            try {
-                FileOutputStream fos = new FileOutputStream(file, true);
-                String history = "Server received a file from => " + serverIpAddress + "\n";
-                fos.write(history.getBytes());
-            } catch (Exception e) {
-                e.printStackTrace();
+                File filepath = context.getObbDir();
+                Log.i(TAG, "FilesDir =>" + filepath + "\n");
+                @SuppressLint("SimpleDateFormat")
+                String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
+                File file = new File(filepath, fileName);
+                try {
+                    FileOutputStream fos = new FileOutputStream(file, true);
+                    String history = "Server received a file from => " + serverIpAddress + "\n";
+                    fos.write(history.getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
-
         }
     }
 

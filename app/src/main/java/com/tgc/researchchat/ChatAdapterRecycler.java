@@ -1,16 +1,23 @@
 package com.tgc.researchchat;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+
+import static android.content.ContentValues.TAG;
 
 public class ChatAdapterRecycler extends RecyclerView.Adapter {
     private static final int VIEW_TYPE_MESSAGE_SENT = 1;
@@ -65,12 +72,14 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
     }
 
     private class ReceivedMessageHolder extends RecyclerView.ViewHolder {
-        TextView messageText, timeText, nameText;
+        TextView messageText, timeText;
+        ImageView messageImage;
 
         ReceivedMessageHolder(View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.text_message_body);
             timeText = itemView.findViewById(R.id.text_message_time);
+            messageImage = itemView.findViewById(R.id.received_image);
         }
 
         void bind(Message message) {
@@ -79,6 +88,27 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
 
             messageText.setText(message.getMessage());
             timeText.setText(currentDateTimeString);
+            Log.d(TAG, "bind: " + message.getMessage());
+            if (message.getMessage().contains("New File Received: ") &&
+                    (message.getMessage().contains("png") ||
+                            message.getMessage().contains("jpg") ||
+                            message.getMessage().contains("jpeg"))) {
+                String[] fileName = message.getMessage().split(":");
+                Log.d(TAG, "bind: Received Message" + fileName[1]);
+                StringBuilder stringBuilder = new StringBuilder(fileName[1]);
+                stringBuilder.deleteCharAt(0);
+                String path = stringBuilder.toString();
+                String directory = context.getObbDir() + "/downloadFolder/" + path;
+                Log.d(TAG, "bind: Print Directory:" + directory);
+                File imgFile = new File(directory);
+                if (imgFile.exists()) {
+                    Log.d(TAG, "bind: +Yeah Exists");
+                    Glide.with(context)
+                            .load(directory)
+                            .override(500, 500)
+                            .into(messageImage);
+                }
+            }
         }
     }
 

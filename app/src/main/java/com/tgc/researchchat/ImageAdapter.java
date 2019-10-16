@@ -90,10 +90,8 @@ public class ImageAdapter extends RecyclerView.Adapter {
             if (imgFile.exists()) {
 
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-
                 receivedImage.setImageBitmap(myBitmap);
                 receivedImage.setVisibility(View.VISIBLE);
-
             }
             timeText.setText(currentDateTimeString);
         }

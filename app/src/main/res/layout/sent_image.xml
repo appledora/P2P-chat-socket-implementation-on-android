@@ -10,6 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/rounded_rectangle_orange"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView

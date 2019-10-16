@@ -30,11 +30,8 @@ Be careful to :
 This is a peer to peer chat and file-sharing app, that connects two deivce on the same network using their IP address and designated port numbers.
 
 ## Getting Started
- <div style="text-align:center" style="width:50px; height:50px"><img src="https://i.imgur.com/CZLDVKI.png" style="width:100%; height=100%"/></div>
+ <div style="text-align:center" ><img src="https://i.imgur.com/CZLDVKI.png" width = "200" height = "400"/></div>
 This screen requires you to put the IP address and Port address of your other peers and a port address on your side to be opened for communication.
-
-
-![](https://i.imgur.com/CZLDVKI.png | width=100)
 
 
 ### Prerequisites

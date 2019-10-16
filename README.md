@@ -3,7 +3,7 @@
 This is a peer to peer chat and file-sharing app, that connects two deivce on the same network using their IP address and designated port numbers.
 
 ## Getting Started
- <div style="text-align:center"><img src="https://i.imgur.com/CZLDVKI.png" /></div>
+ <div style="text-align:center" ><img src="https://i.imgur.com/CZLDVKI.png" style="width:50px; height:50px"/></div>
 This screen requires you to put the IP address and Port address of your other peers and a port address on your side to be opened for communication.
 
 ### Prerequisites

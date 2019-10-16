@@ -33,6 +33,10 @@ This is a peer to peer chat and file-sharing app, that connects two deivce on th
  <div style="text-align:center" style="width:50px; height:50px"><img src="https://i.imgur.com/CZLDVKI.png" style="width:100%; height=100%"/></div>
 This screen requires you to put the IP address and Port address of your other peers and a port address on your side to be opened for communication.
 
+
+<div style="height:42px;width:42px">
+    <img style="height:42px" src="https://i.imgur.com/CZLDVKI.png">
+</div>
 ### Prerequisites
 
 What things you need to install the software and how to install them

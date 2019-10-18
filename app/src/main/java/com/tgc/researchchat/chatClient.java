@@ -239,33 +239,12 @@ public class chatClient extends AppCompatActivity {
                     openSettingsDialog();
                 }
 
-             /*   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (shouldShowRequestPermissionRationale(WRITE_EXTERNAL_STORAGE) {
-                        showMessageOKCancel("You need to allow access to both the permissions",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                            requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE},
-                                                    REQUEST_CODE);
-                                        }
-                                    }
-                                });
-                        return;
-                    }
-                }*/
+
             }
         }
     }
 
-   /* private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
-        new AlertDialog.Builder(chatClient.this)
-                .setMessage(message)
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
-                .create()
-                .show();
-    }*/
+
 
     private void openSettingsDialog() {
 

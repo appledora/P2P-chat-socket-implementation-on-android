@@ -1,6 +1,10 @@
 package com.tgc.researchchat;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +13,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,7 +33,7 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
     private static final int LATEST_TYPE_MESSAGE_RECEIVED = 4;
     private Context context;
     private ArrayList<Message> arrayList;
-
+    private static MediaPlayer mediaPlayer = new MediaPlayer();
     ChatAdapterRecycler(Context context, ArrayList<Message> arrayList) {
         this.context = context;
         this.arrayList = arrayList;
@@ -101,13 +106,17 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
     private class ReceivedMessageHolder extends RecyclerView.ViewHolder {
         TextView messageText, timeText;
         ImageView messageImage;
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
 
         ReceivedMessageHolder(View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.text_message_body);
             timeText = itemView.findViewById(R.id.text_message_time);
             messageImage = itemView.findViewById(R.id.received_image);
+            itemView.setOnClickListener(this::onClick);
+            itemView.setOnLongClickListener(this::onLongclick);
         }
+
 
         void bind(Message message) {
             SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
@@ -136,6 +145,26 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
                             .into(messageImage);
                 }
             }
+        }
+
+        void onClick(View view) {
+            Toast.makeText(context, "Short CLICKS", Toast.LENGTH_SHORT).show();
+            if (messageText.getText().toString().contains(".mp3") && messageText.getText().toString().contains("New File Received: ")) {
+                String[] message = messageText.getText().toString().split(":");
+                Log.d(TAG, "onClick: " + message[1]);
+                String path = message[1];
+                path.trim();
+                Uri uri = Uri.parse(context.getObbDir() + "/downloadFolder/" + path);
+                mediaPlayer = MediaPlayer.create(context, uri);
+                mediaPlayer.start();
+            }
+        }
+
+        boolean onLongclick(View view) {
+            ClipData clip = ClipData.newPlainText("Copied Text", messageText.getText());
+            clipboard.setPrimaryClip(clip);
+            Toast.makeText(context, "Message copied to clipboard", Toast.LENGTH_SHORT).show();
+            return true;
         }
     }
 

@@ -1,26 +1,11 @@
 package com.tgc.researchchat;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Environment;
-import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -31,12 +16,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class fileServer extends Thread {
 
@@ -67,7 +48,7 @@ public class fileServer extends Thread {
             while (!Thread.interrupted()) {
                 Socket connectFileSocket = fileSocket.accept();
                 Log.d(TAG, "run: File Opened");
-                fileFromClient handleFile = new fileFromClient();
+                receiveFiles handleFile = new receiveFiles();
                 handleFile.execute(connectFileSocket);
             }
             fileSocket.close();
@@ -77,7 +58,7 @@ public class fileServer extends Thread {
     }
 
     @SuppressLint("StaticFieldLeak")
-    public class fileFromClient extends AsyncTask<Socket, Void, String> {
+    public class receiveFiles extends AsyncTask<Socket, Void, String> {
         String text;
 
         @Override

@@ -7,24 +7,18 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Log;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 public class chatServer extends Thread {
 
@@ -61,7 +55,7 @@ public class chatServer extends Thread {
             System.out.println(TAG + "started");
             while (!Thread.interrupted()) {
                 Socket connectSocket = initSocket.accept();
-                ReadFromClient handle = new ReadFromClient();
+                receiveTexts handle = new receiveTexts();
                 handle.execute(connectSocket);
             }
             initSocket.close();
@@ -75,7 +69,7 @@ public class chatServer extends Thread {
     }
 
     @SuppressLint("StaticFieldLeak")
-    public class ReadFromClient extends AsyncTask<Socket, Void, String> {
+    public class receiveTexts extends AsyncTask<Socket, Void, String> {
         String text;
 
         @Override

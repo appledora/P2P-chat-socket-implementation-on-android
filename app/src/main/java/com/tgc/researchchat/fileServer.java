@@ -3,6 +3,7 @@ package com.tgc.researchchat;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -63,7 +64,7 @@ public class fileServer extends Thread {
         @Override
         protected String doInBackground(Socket... sockets) {
             try {
-                File testDirectory = new File(context.getObbDir(), "downloadFolder");
+                File testDirectory = Environment.getExternalStorageDirectory();
                 if (!testDirectory.exists())
                     testDirectory.mkdirs();
                 try {
@@ -71,7 +72,7 @@ public class fileServer extends Thread {
                     DataInputStream dataInputStream = new DataInputStream(inputStream);
 
                     String fileName = dataInputStream.readUTF();
-                    File outputFile = new File(testDirectory, fileName);
+                    File outputFile = new File(testDirectory+"/Download/", fileName);
                     text = fileName;
 
                     OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile));

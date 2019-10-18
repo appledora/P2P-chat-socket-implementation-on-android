@@ -50,7 +50,7 @@ This screen comes with a simple Graphical Interface. On top, the user can see hi
 <p  align="center"  ><img  src="https://i.imgur.com/mXTPAJi.png"  width = "200"  height = "400"/></p>
 
   
-Sender and receiver will both be able to see the File name, after the file has been subsequently sent and received.
+Sender and receiver will both be able to see the File name, after the file has been subsequently sent and received. Image files are shown as thumbnails with filenames on both ends.
 
 <p  align="center"  ><img  src="https://i.imgur.com/wtvZ7xV.png"  width = "200"  height = "400"/></p>
 

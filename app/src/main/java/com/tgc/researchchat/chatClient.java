@@ -203,6 +203,8 @@ public class chatClient extends AppCompatActivity implements PickiTCallbacks {
                 try {
                     FileOutputStream fos = new FileOutputStream(file, true);
                     fos.write(s.getBytes());
+                    Toast.makeText(chatClient.this, "Chat history has been saved in " + path +"/Download/  folder", Toast.LENGTH_SHORT).show();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

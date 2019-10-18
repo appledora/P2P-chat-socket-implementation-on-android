@@ -28,7 +28,6 @@ public class fileServer extends Thread {
     private ArrayList<Message> messageArray;
     private ChatAdapterRecycler mAdapter;
     private int port;
-    private int REQUEST_CODE = 200;
 
     fileServer(Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
         this.messageArray = messageArray;

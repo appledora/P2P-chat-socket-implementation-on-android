@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -161,16 +162,18 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
             if (messageText.getText().toString().contains(".mp3") && messageText.getText().toString().contains("New File Received: ")) {
                 String[] message = messageText.getText().toString().split(":");
                 Log.d(TAG, "onClick: " + message[1]);
-                String path = message[1];
-                path = path.trim();
-                Uri uri = Uri.parse(context.getObbDir() + "/downloadFolder/" + path);
+                String filename = message[1];
+                filename = filename.trim();
+                String path = Environment.getExternalStorageDirectory() + "/Download/";
+                System.out.println(TAG + "path and filename => " + path+filename);
+                Uri uri = Uri.parse(path + filename);
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.stop();
                     playButton.setVisibility(View.VISIBLE);
                     pauseButton.setVisibility(View.INVISIBLE);
                 } else {
                     mediaPlayer = MediaPlayer.create(context, uri);
-                    Log.d(TAG, "onClick: " + context.getObbDir() + "/downloadFolder/" + path);
+                    //Log.d(TAG, "onClick: " + context.getObbDir() + "/downloadFolder/" + path);
                     mediaPlayer.start();
                     playButton.setVisibility(View.INVISIBLE);
                     pauseButton.setVisibility(View.VISIBLE);

@@ -91,17 +91,7 @@ public class chatServer extends Thread {
                 stringBuilder.deleteCharAt(0);
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
-               /* File path = Environment.getExternalStorageDirectory();
-                Log.i(TAG, "FilesDir =>" + path + "\n");
-                @SuppressLint("SimpleDateFormat") String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
-                File file = new File(path, fileName);
-                try {
-                    FileOutputStream fos = new FileOutputStream(file, true);
-                    String history = "server: " + result + "\n";
-                    fos.write(history.getBytes());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }*/
+
                 messageArray.add(new Message(result, 1, Calendar.getInstance().getTime()));
                 messageList.setAdapter(mAdapter);
             } else {

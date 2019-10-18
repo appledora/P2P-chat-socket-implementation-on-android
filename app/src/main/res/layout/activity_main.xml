@@ -12,7 +12,7 @@
         android:id="@+id/tvP2P"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:background="@color/colorAccent"
+        android:background="@drawable/circle"
         android:src="@drawable/p2p"
         app:layout_constraintBottom_toTopOf="@id/Main"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,7 +23,7 @@
     <ImageView
         android:id="@+id/ivP2P"
         android:layout_width="200dp"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:background="@color/colorAccent"
         android:src="@drawable/tvp2px"
         app:layout_constraintBottom_toTopOf="@id/Main"
@@ -88,7 +88,6 @@
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
                 android:inputType="number"
-                android:text="5000"
                 android:textAlignment="center" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -112,7 +111,6 @@
                 android:layout_weight="1"
                 android:digits="0123456789."
                 android:inputType="number"
-                android:text="192.168.0."
                 android:textAlignment="center" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -125,8 +123,6 @@
             android:theme="@style/TextLabel"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textinpOwnPort">
-            >
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/portEditText"
                 android:layout_width="match_parent"
@@ -136,13 +132,10 @@
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"
                 android:inputType="number"
-                android:text="5000"
                 android:textAlignment="center"
-
                 />
         </com.google.android.material.textfield.TextInputLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
     <Button
         android:id="@+id/connectButton"
         android:layout_width="match_parent"

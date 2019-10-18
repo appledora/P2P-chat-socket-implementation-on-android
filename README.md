@@ -44,7 +44,7 @@ This requires user to put the IP address and Port address of other peer and a po
 
 #### About Chat Screen
 
-This screen comes with a simple Graphical Interface. On top, the user can see his peer information and the ServerSocket Status of this end. The 'clip' button in the typing field, is used to select file from the storage device. Clicking it opens the default Android File explorer where the user can select any type of files of up (8x16)MB. The received files are stored in the DOWNLOAD folder of the Internal storage.
+This screen comes with a simple Graphical Interface. On top, the user can see his peer information and the ServerSocket Status of this end. The 'clip' button in the typing field, is used to select file from the storage device,google drive and other available online/offline storage systems. Clicking it opens the default Android File explorer where the user can select any type of files of up (8x16)MB. The received files are stored in the DOWNLOAD folder of the Internal storage.
 
 
 <p  align="center"  ><img  src="https://i.imgur.com/mXTPAJi.png"  width = "200"  height = "400"/></p>

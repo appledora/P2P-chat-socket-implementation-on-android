@@ -101,10 +101,10 @@
             android:layout_gravity="center"
             android:background="?android:selectableItemBackgroundBorderless"
             android:clickable="true"
+            android:focusable="true"
             android:src="@drawable/ic_send_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:focusable="true"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

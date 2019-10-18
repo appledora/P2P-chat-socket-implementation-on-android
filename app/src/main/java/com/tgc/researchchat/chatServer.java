@@ -8,22 +8,17 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 public class chatServer extends Thread {
 
@@ -60,7 +55,7 @@ public class chatServer extends Thread {
             System.out.println(TAG + "started");
             while (!Thread.interrupted()) {
                 Socket connectSocket = initSocket.accept();
-                ReadFromClient handle = new ReadFromClient();
+                receiveTexts handle = new receiveTexts();
                 handle.execute(connectSocket);
             }
             initSocket.close();
@@ -74,7 +69,7 @@ public class chatServer extends Thread {
     }
 
     @SuppressLint("StaticFieldLeak")
-    public class ReadFromClient extends AsyncTask<Socket, Void, String> {
+    public class receiveTexts extends AsyncTask<Socket, Void, String> {
         String text;
 
         @Override
@@ -96,7 +91,7 @@ public class chatServer extends Thread {
                 stringBuilder.deleteCharAt(0);
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
-                File path = context.getObbDir();
+               /* File path = Environment.getExternalStorageDirectory();
                 Log.i(TAG, "FilesDir =>" + path + "\n");
                 @SuppressLint("SimpleDateFormat") String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
                 File file = new File(path, fileName);
@@ -106,7 +101,7 @@ public class chatServer extends Thread {
                     fos.write(history.getBytes());
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
+                }*/
                 messageArray.add(new Message(result, 1, Calendar.getInstance().getTime()));
                 messageList.setAdapter(mAdapter);
             } else {
@@ -114,7 +109,7 @@ public class chatServer extends Thread {
                 stringBuilder.deleteCharAt(0);
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
-                ListView message_List;
+                RecyclerView message_List;
                 message_List = activity.findViewById(R.id.message_list);
                 LayerDrawable layerDrawable = (LayerDrawable) message_List.getBackground();
                 GradientDrawable gradientDrawable = (GradientDrawable) layerDrawable.findDrawableByLayerId(R.id.shapeColor);

@@ -142,6 +142,7 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
     private class SentMessageHolder extends RecyclerView.ViewHolder {
         TextView messageText, timeText;
         ImageView messageImage;
+
         SentMessageHolder(View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.send_message_body);

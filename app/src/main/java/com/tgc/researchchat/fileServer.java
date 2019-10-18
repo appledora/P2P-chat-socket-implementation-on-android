@@ -16,10 +16,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 public class fileServer extends Thread {
 
@@ -30,6 +28,7 @@ public class fileServer extends Thread {
     private ArrayList<Message> messageArray;
     private ChatAdapterRecycler mAdapter;
     private int port;
+    private int REQUEST_CODE = 200;
 
     fileServer(Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
         this.messageArray = messageArray;
@@ -49,7 +48,7 @@ public class fileServer extends Thread {
             while (!Thread.interrupted()) {
                 Socket connectFileSocket = fileSocket.accept();
                 Log.d(TAG, "run: File Opened");
-                fileFromClient handleFile = new fileFromClient();
+                receiveFiles handleFile = new receiveFiles();
                 handleFile.execute(connectFileSocket);
             }
             fileSocket.close();
@@ -59,7 +58,7 @@ public class fileServer extends Thread {
     }
 
     @SuppressLint("StaticFieldLeak")
-    public class fileFromClient extends AsyncTask<Socket, Void, String> {
+    public class receiveFiles extends AsyncTask<Socket, Void, String> {
         String text;
 
         @Override
@@ -105,21 +104,9 @@ public class fileServer extends Thread {
                 messageArray.add(new Message("New File Received: " + result, 1, Calendar.getInstance().getTime()));
                 messageList.setAdapter(mAdapter);
 
-                File filepath = context.getObbDir();
-                Log.i(TAG, "FilesDir =>" + filepath + "\n");
-                @SuppressLint("SimpleDateFormat")
-                String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
-                File file = new File(filepath, fileName);
-                try {
-                    FileOutputStream fos = new FileOutputStream(file, true);
-                    String history = "Server received a file from => " + serverIpAddress + "\n";
-                    fos.write(history.getBytes());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
             }
         }
     }
+
 
 }

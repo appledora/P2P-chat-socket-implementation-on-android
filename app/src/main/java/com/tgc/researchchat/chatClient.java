@@ -1,15 +1,20 @@
 package com.tgc.researchchat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
@@ -22,13 +27,20 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.hbisoft.pickit.PickiT;
+import com.hbisoft.pickit.PickiTCallbacks;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -44,7 +56,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-public class chatClient extends AppCompatActivity {
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
+public class chatClient extends AppCompatActivity implements PickiTCallbacks {
     String TAG = "CLIENT ACTIVITY";
 
     EditText smessage;
@@ -60,9 +74,12 @@ public class chatClient extends AppCompatActivity {
     String ownIp;
     Toolbar toolbar;
     ProgressBar progressBar;
+    PickiT pickiT;
     private Boolean exit = false;
     private RecyclerView mMessageRecycler;
     private ChatAdapterRecycler mMessageAdapter;
+    private int REQUEST_CODE = 200;
+
 
     @SuppressLint("CutPasteId")
     @Override
@@ -70,6 +87,7 @@ public class chatClient extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbox);
 
+        pickiT = new PickiT(this, this);
         smessage = findViewById(R.id.edittext_chatbox);
         toolbar = findViewById(R.id.toolbar);
         sent = findViewById(R.id.button_chatbox_send);
@@ -108,6 +126,13 @@ public class chatClient extends AppCompatActivity {
             f = new fileServer(getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress);
             f.start();
         }
+
+        if (permissionAlreadyGranted()) {
+            Toast.makeText(chatClient.this, "Permission is already granted!", Toast.LENGTH_SHORT).show();
+
+        }
+
+        requestPermission();
         sent.setOnClickListener(v -> {
             if (!smessage.getText().toString().isEmpty()) {
                 User user = new User("1:" + smessage.getText().toString());
@@ -124,6 +149,7 @@ public class chatClient extends AppCompatActivity {
             intent.setType("*/*");
             startActivityForResult(Intent.createChooser(intent, "Select file"), 1);
         });
+
 
     }
 
@@ -157,29 +183,91 @@ public class chatClient extends AppCompatActivity {
                     .build()
                     .show();
         }
+        if (item.getItemId() == R.id.action_history) {
+
+            File path = Environment.getExternalStorageDirectory();
+            Log.i(TAG, "FilesDir =>" + path + "\n");
+            String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
+            File file = new File(path + "/Download/", fileName);
+
+            for (int i = 0; i < messageArray.size(); i++) {
+                String s = messageArray.get(i).getMessage();
+                if (messageArray.get(i).isSent()) {
+                    s = "Client:" + s + "\n";
+                    System.out.println(s);
+                } else {
+                    s = "Serer : " + s + "\n";
+                    System.out.println(s);
+                }
+
+                try {
+                    FileOutputStream fos = new FileOutputStream(file, true);
+                    fos.write(s.getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean permissionAlreadyGranted() {
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (result == PackageManager.PERMISSION_GRANTED)
+            return true;
+
+        return false;
+    }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        if (requestCode == REQUEST_CODE) {
+
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission granted successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission is denied!", Toast.LENGTH_SHORT).show();
+                boolean showRationale = shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                if (!showRationale) {
+                    openSettingsDialog();
+                }
+
+
+            }
+        }
+    }
+
+
+    private void openSettingsDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(chatClient.this);
+        builder.setTitle("Required Permissions");
+        builder.setMessage("This app require permission to use awesome feature. Grant them in app settings.");
+        builder.setPositiveButton("Take Me To SETTINGS", (dialog, which) -> {
+            dialog.cancel();
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package", getPackageName(), null);
+            intent.setData(uri);
+            startActivityForResult(intent, 101);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
+
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        String path;
         if (requestCode == 1) {
-            try {
-                Uri txtUri = data.getData();
-                path = txtUri.getPath();
-                Log.d(TAG, "onActivityResult: " + path);
-                String[] arrOfStr = path.split(":");
-                if (arrOfStr.length > 1) {
-                    Log.d(TAG, "onActivityResult: Textual " + path);
-                    new fileTransfer(arrOfStr[1]).execute();
-                } else {
-                    Log.d(TAG, "onActivityResult: Image " + path);
-                    new fileTransfer(arrOfStr[0]).execute();
-                }
-            } catch (NullPointerException e) {
-                Log.d(TAG, "onActivityResult: No File Selected");
-            }
+            pickiT.getPath(data.getData(), Build.VERSION.SDK_INT);
         }
     }
 
@@ -192,6 +280,7 @@ public class chatClient extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (exit) {
+            pickiT.deleteTemporaryFile();
             s.interrupt();
             f.interrupt();
             finish();
@@ -202,6 +291,23 @@ public class chatClient extends AppCompatActivity {
             new Handler().postDelayed(() -> exit = false, 3 * 1000);
 
         }
+    }
+
+    @Override
+    public void PickiTonStartListener() {
+
+    }
+
+    @Override
+    public void PickiTonProgressUpdate(int progress) {
+
+    }
+
+    @Override
+    public void PickiTonCompleteListener(String path, boolean wasDriveFile, boolean wasUnknownProvider, boolean wasSuccessful, String Reason) {
+        Log.d(TAG, "PickiTonCompleteListener: Directory was" + path);
+        new fileTransfer(path).execute();
+
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -240,17 +346,7 @@ public class chatClient extends AppCompatActivity {
                 stringBuilder.deleteCharAt(0);
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
-                File path = getApplicationContext().getObbDir();
-                Log.i(TAG, "FilesDir =>" + path + "\n");
-                String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
-                File file = new File(path, fileName);
-                try {
-                    FileOutputStream fos = new FileOutputStream(file, true);
-                    String history = "client: " + result + "\n";
-                    fos.write(history.getBytes());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
                 messageArray.add(new Message(result, 0, Calendar.getInstance().getTime()));
                 mMessageRecycler.setAdapter(mMessageAdapter);
                 smessage.setText("");
@@ -328,17 +424,7 @@ public class chatClient extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
             });
             Log.d(TAG, "onPostExecute: " + name);
-            File filepath = getApplicationContext().getObbDir();
-            Log.i(TAG, "FilesDir =>" + filepath + "\n");
-            String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
-            File file = new File(filepath, fileName);
-            try {
-                FileOutputStream fos = new FileOutputStream(file, true);
-                String history = "client sent a file from => " + path + "\n";
-                fos.write(history.getBytes());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
             if (!name.isEmpty()) {
                 messageArray.add(new Message("New File Sent: " + name + ":" + path, 0, Calendar.getInstance().getTime()));
                 mMessageRecycler.setAdapter(mMessageAdapter);

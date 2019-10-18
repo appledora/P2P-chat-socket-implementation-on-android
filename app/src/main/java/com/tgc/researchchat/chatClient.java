@@ -3,7 +3,6 @@ package com.tgc.researchchat;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
@@ -55,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class chatClient extends AppCompatActivity {
@@ -148,7 +146,6 @@ public class chatClient extends AppCompatActivity {
         });
 
 
-
     }
 
     @Override
@@ -181,20 +178,19 @@ public class chatClient extends AppCompatActivity {
                     .build()
                     .show();
         }
-        if(item.getItemId() == R.id.action_history){
+        if (item.getItemId() == R.id.action_history) {
 
             File path = Environment.getExternalStorageDirectory();
             Log.i(TAG, "FilesDir =>" + path + "\n");
             String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
             File file = new File(path + "/Download/", fileName);
 
-            for(int i = 0;i< messageArray.size();i++){
+            for (int i = 0; i < messageArray.size(); i++) {
                 String s = messageArray.get(i).getMessage();
-                if(messageArray.get(i).isSent()) {
+                if (messageArray.get(i).isSent()) {
                     s = "Client:" + s + "\n";
                     System.out.println(s);
-                }
-                else{
+                } else {
                     s = "Serer : " + s + "\n";
                     System.out.println(s);
                 }
@@ -210,7 +206,7 @@ public class chatClient extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private boolean permissionAlreadyGranted (){
+    private boolean permissionAlreadyGranted() {
         int result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         if (result == PackageManager.PERMISSION_GRANTED)
@@ -219,7 +215,7 @@ public class chatClient extends AppCompatActivity {
         return false;
     }
 
-    private void requestPermission (){
+    private void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
 
     }
@@ -234,8 +230,8 @@ public class chatClient extends AppCompatActivity {
                 Toast.makeText(this, "Permission granted successfully", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Permission is denied!", Toast.LENGTH_SHORT).show();
-                boolean showRationale = shouldShowRequestPermissionRationale( Manifest.permission.WRITE_EXTERNAL_STORAGE );
-                if (! showRationale) {
+                boolean showRationale = shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                if (!showRationale) {
                     openSettingsDialog();
                 }
 
@@ -243,7 +239,6 @@ public class chatClient extends AppCompatActivity {
             }
         }
     }
-
 
 
     private void openSettingsDialog() {
@@ -262,6 +257,7 @@ public class chatClient extends AppCompatActivity {
         builder.show();
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

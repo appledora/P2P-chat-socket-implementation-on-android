@@ -13,7 +13,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -105,7 +104,7 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
 
     private class ReceivedMessageHolder extends RecyclerView.ViewHolder {
         TextView messageText, timeText;
-        ImageView messageImage;
+        ImageView messageImage, playButton, pauseButton;
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
 
         ReceivedMessageHolder(View itemView) {
@@ -113,6 +112,8 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
             messageText = itemView.findViewById(R.id.text_message_body);
             timeText = itemView.findViewById(R.id.text_message_time);
             messageImage = itemView.findViewById(R.id.received_image);
+            playButton = itemView.findViewById(R.id.play_button);
+            pauseButton = itemView.findViewById(R.id.pause_button);
             itemView.setOnClickListener(this::onClick);
             itemView.setOnLongClickListener(this::onLongclick);
         }
@@ -144,26 +145,42 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
                             .override(500, 500)
                             .into(messageImage);
                 }
+            } else if (message.getMessage().contains("New File Received: ") &&
+                    (message.getMessage().contains("mp3"))) {
+                if (mediaPlayer.isPlaying()) {
+                    playButton.setVisibility(View.INVISIBLE);
+                    pauseButton.setVisibility(View.VISIBLE);
+                } else {
+                    playButton.setVisibility(View.VISIBLE);
+                    pauseButton.setVisibility(View.INVISIBLE);
+                }
             }
         }
 
         void onClick(View view) {
-            Toast.makeText(context, "Short CLICKS", Toast.LENGTH_SHORT).show();
             if (messageText.getText().toString().contains(".mp3") && messageText.getText().toString().contains("New File Received: ")) {
                 String[] message = messageText.getText().toString().split(":");
                 Log.d(TAG, "onClick: " + message[1]);
                 String path = message[1];
-                path.trim();
+                path = path.trim();
                 Uri uri = Uri.parse(context.getObbDir() + "/downloadFolder/" + path);
-                mediaPlayer = MediaPlayer.create(context, uri);
-                mediaPlayer.start();
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                    playButton.setVisibility(View.VISIBLE);
+                    pauseButton.setVisibility(View.INVISIBLE);
+                } else {
+                    mediaPlayer = MediaPlayer.create(context, uri);
+                    Log.d(TAG, "onClick: " + context.getObbDir() + "/downloadFolder/" + path);
+                    mediaPlayer.start();
+                    playButton.setVisibility(View.INVISIBLE);
+                    pauseButton.setVisibility(View.VISIBLE);
+                }
             }
         }
 
         boolean onLongclick(View view) {
             ClipData clip = ClipData.newPlainText("Copied Text", messageText.getText());
             clipboard.setPrimaryClip(clip);
-            Toast.makeText(context, "Message copied to clipboard", Toast.LENGTH_SHORT).show();
             return true;
         }
     }

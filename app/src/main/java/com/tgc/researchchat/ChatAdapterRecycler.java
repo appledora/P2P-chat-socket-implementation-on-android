@@ -187,13 +187,18 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
 
     private class SentMessageHolder extends RecyclerView.ViewHolder {
         TextView messageText, timeText;
-        ImageView messageImage;
+        ImageView messageImage, playButton, pauseButton;
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
 
         SentMessageHolder(View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.send_message_body);
             timeText = itemView.findViewById(R.id.text_message_time);
             messageImage = itemView.findViewById(R.id.sent_image);
+            playButton = itemView.findViewById(R.id.sent_play_button);
+            pauseButton = itemView.findViewById(R.id.sent_pause_button);
+            itemView.setOnClickListener(this::onClick);
+            itemView.setOnLongClickListener(this::onLongclick);
         }
 
         void bind(Message message) {
@@ -220,9 +225,44 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
                             .override(500, 500)
                             .into(messageImage);
                 }
+            } else if (message.getMessage().contains("New File Sent: ") &&
+                    (message.getMessage().contains("mp3"))) {
+                if (mediaPlayer.isPlaying()) {
+                    playButton.setVisibility(View.INVISIBLE);
+                    pauseButton.setVisibility(View.VISIBLE);
+                } else {
+                    playButton.setVisibility(View.VISIBLE);
+                    pauseButton.setVisibility(View.INVISIBLE);
+                }
             }
             messageText.setText(newMessage);
             timeText.setText(currentDateTimeString);
+        }
+
+        void onClick(View view) {
+            if (messageText.getText().toString().contains(".mp3") && messageText.getText().toString().contains("New File Sent: ")) {
+                String[] message = messageText.getText().toString().split(":");
+                Log.d(TAG, "onClick: " + message[2]);
+                String path = message[2];
+                path = path.trim();
+                Uri uri = Uri.parse(path);
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                    playButton.setVisibility(View.VISIBLE);
+                    pauseButton.setVisibility(View.INVISIBLE);
+                } else {
+                    mediaPlayer = MediaPlayer.create(context, uri);
+                    mediaPlayer.start();
+                    playButton.setVisibility(View.INVISIBLE);
+                    pauseButton.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+
+        boolean onLongclick(View view) {
+            ClipData clip = ClipData.newPlainText("Copied Text", messageText.getText());
+            clipboard.setPrimaryClip(clip);
+            return true;
         }
     }
 }

@@ -1,15 +1,21 @@
 package com.tgc.researchchat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Menu;
@@ -22,8 +28,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,6 +55,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
 public class chatClient extends AppCompatActivity {
     String TAG = "CLIENT ACTIVITY";
 
@@ -53,7 +67,6 @@ public class chatClient extends AppCompatActivity {
     int myport;
     int sendPort;
     ArrayList<Message> messageArray;
-    ArrayList<MyFiles> filesArray;
     ImageButton fileUp;
     TextView textView;
     chatServer s;
@@ -64,7 +77,7 @@ public class chatClient extends AppCompatActivity {
     private Boolean exit = false;
     private RecyclerView mMessageRecycler;
     private ChatAdapterRecycler mMessageAdapter;
-    private ImageAdapter imageAdapter;
+    private int REQUEST_CODE = 200;
 
     @SuppressLint("CutPasteId")
     @Override
@@ -81,10 +94,8 @@ public class chatClient extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         messageArray = new ArrayList<>();
-        filesArray = new ArrayList<>();
         mMessageRecycler = findViewById(R.id.message_list);
         mMessageAdapter = new ChatAdapterRecycler(this, messageArray);
-        imageAdapter = new ImageAdapter(this.getApplicationContext(), filesArray);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         layoutManager.setStackFromEnd(true);
@@ -109,9 +120,16 @@ public class chatClient extends AppCompatActivity {
         if (!serverIpAddress.equals("")) {
             s = new chatServer(ownIp, this, getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress);
             s.start();
-            f = new fileServer(getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress,imageAdapter,filesArray);
+            f = new fileServer(getApplicationContext(), mMessageAdapter, mMessageRecycler, messageArray, myport, serverIpAddress);
             f.start();
         }
+
+        if (permissionAlreadyGranted()) {
+            Toast.makeText(chatClient.this, "Permission is already granted!", Toast.LENGTH_SHORT).show();
+
+        }
+
+        requestPermission();
         sent.setOnClickListener(v -> {
             if (!smessage.getText().toString().isEmpty()) {
                 User user = new User("1:" + smessage.getText().toString());
@@ -128,6 +146,8 @@ public class chatClient extends AppCompatActivity {
             intent.setType("*/*");
             startActivityForResult(Intent.createChooser(intent, "Select file"), 1);
         });
+
+
 
     }
 
@@ -161,9 +181,108 @@ public class chatClient extends AppCompatActivity {
                     .build()
                     .show();
         }
+        if(item.getItemId() == R.id.action_history){
+
+            File path = Environment.getExternalStorageDirectory();
+            Log.i(TAG, "FilesDir =>" + path + "\n");
+            String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
+            File file = new File(path + "/Download/", fileName);
+
+            for(int i = 0;i< messageArray.size();i++){
+                String s = messageArray.get(i).getMessage();
+                if(messageArray.get(i).isSent()) {
+                    s = "Client:" + s + "\n";
+                    System.out.println(s);
+                }
+                else{
+                    s = "Serer : " + s + "\n";
+                    System.out.println(s);
+                }
+
+                try {
+                    FileOutputStream fos = new FileOutputStream(file, true);
+                    fos.write(s.getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean permissionAlreadyGranted (){
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (result == PackageManager.PERMISSION_GRANTED)
+            return true;
+
+        return false;
+    }
+
+    private void requestPermission (){
+        ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        if (requestCode == REQUEST_CODE) {
+
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission granted successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission is denied!", Toast.LENGTH_SHORT).show();
+                boolean showRationale = shouldShowRequestPermissionRationale( Manifest.permission.WRITE_EXTERNAL_STORAGE );
+                if (! showRationale) {
+                    openSettingsDialog();
+                }
+
+             /*   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (shouldShowRequestPermissionRationale(WRITE_EXTERNAL_STORAGE) {
+                        showMessageOKCancel("You need to allow access to both the permissions",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                            requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE},
+                                                    REQUEST_CODE);
+                                        }
+                                    }
+                                });
+                        return;
+                    }
+                }*/
+            }
+        }
+    }
+
+   /* private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(chatClient.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }*/
+
+    private void openSettingsDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(chatClient.this);
+        builder.setTitle("Required Permissions");
+        builder.setMessage("This app require permission to use awesome feature. Grant them in app settings.");
+        builder.setPositiveButton("Take Me To SETTINGS", (dialog, which) -> {
+            dialog.cancel();
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package", getPackageName(), null);
+            intent.setData(uri);
+            startActivityForResult(intent, 101);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
+
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -244,17 +363,7 @@ public class chatClient extends AppCompatActivity {
                 stringBuilder.deleteCharAt(0);
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
-                File path = getApplicationContext().getObbDir();
-                Log.i(TAG, "FilesDir =>" + path + "\n");
-                String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
-                File file = new File(path, fileName);
-                try {
-                    FileOutputStream fos = new FileOutputStream(file, true);
-                    String history = "client: " + result + "\n";
-                    fos.write(history.getBytes());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
                 messageArray.add(new Message(result, 0, Calendar.getInstance().getTime()));
                 mMessageRecycler.setAdapter(mMessageAdapter);
                 smessage.setText("");
@@ -332,25 +441,10 @@ public class chatClient extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
             });
             Log.d(TAG, "onPostExecute: " + name);
-            File filepath = getApplicationContext().getObbDir();
-            Log.i(TAG, "FilesDir =>" + filepath + "\n");
-            String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
-            File file = new File(filepath, fileName);
-            try {
-                FileOutputStream fos = new FileOutputStream(file, true);
-                String history = "client sent a file from => " + path + "\n";
-                fos.write(history.getBytes());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
             if (!name.isEmpty()) {
-                messageArray.add(new Message("New File Sent: " + name, 0, Calendar.getInstance().getTime()));
+                messageArray.add(new Message("New File Sent: " + name + ":" + path, 0, Calendar.getInstance().getTime()));
                 mMessageRecycler.setAdapter(mMessageAdapter);
-                if(name.contains("jpg") || name.contains("jpeg") || name.contains("png")){
-                    System.out.println(TAG + " image Adapter added");
-                    filesArray.add(new MyFiles(path,0,Calendar.getInstance().getTime()));
-                    mMessageRecycler.setAdapter(imageAdapter);
-                }
                 smessage.setText("");
             } else {
                 Toast toast = Toast.makeText(getApplicationContext(), "File Sending Error.", Toast.LENGTH_SHORT);

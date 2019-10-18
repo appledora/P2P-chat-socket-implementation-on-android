@@ -5,4 +5,9 @@
         android:id="@+id/action_settings"
         android:title="Change Background Color"
         app:showAsAction="never"></item>
+
+    <item
+        android:id="@+id/action_history"
+        android:title="Save Chat history"
+        app:showAsAction="never"></item>
 </menu>

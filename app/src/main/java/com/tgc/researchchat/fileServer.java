@@ -1,11 +1,26 @@
 package com.tgc.researchchat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -21,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
 public class fileServer extends Thread {
 
     private Context context;
@@ -28,20 +45,17 @@ public class fileServer extends Thread {
     private String TAG = "FILE SERVER";
     private RecyclerView messageList;
     private ArrayList<Message> messageArray;
-    private  ArrayList<MyFiles> filesArray;
     private ChatAdapterRecycler mAdapter;
-    private ImageAdapter imageAdapter;
     private int port;
+    private int REQUEST_CODE = 200;
 
-    fileServer(Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress, ImageAdapter imageAdapter, ArrayList<MyFiles> filesArray) {
+    fileServer(Context context, ChatAdapterRecycler mAdapter, RecyclerView messageList, ArrayList<Message> messageArray, int port, String serverIpAddress) {
         this.messageArray = messageArray;
         this.messageList = messageList;
-        this.filesArray = filesArray;
         this.mAdapter = mAdapter;
         this.port = port;
         this.context = context;
         this.serverIpAddress = serverIpAddress;
-        this.imageAdapter = imageAdapter;
     }
 
     public void run() {
@@ -105,29 +119,14 @@ public class fileServer extends Thread {
 
         protected void onPostExecute(String result) {
             Log.d(TAG, "onPostExecute: Result" + result);
-            messageArray.add(new Message("New File Received: " + result, 1, Calendar.getInstance().getTime()));
-            messageList.setAdapter(mAdapter);
-            if(result.contains("jpg") || result.contains("jpeg") || result.contains("png")){
-                System.out.println(TAG + " image Adapter added");
-                String directory = context.getObbDir() +"/downloadFolder/" + result;
-                System.out.println("IMAGE DIRECTORY => " + directory);
-                filesArray.add(new MyFiles(directory,1,Calendar.getInstance().getTime()));
-                messageList.setAdapter(imageAdapter);
-            }
-            File filepath = context.getObbDir();
-            Log.i(TAG, "FilesDir =>" + filepath + "\n");
-            @SuppressLint("SimpleDateFormat")
-            String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
-            File file = new File(filepath, fileName);
-            try {
-                FileOutputStream fos = new FileOutputStream(file, true);
-                String history = "Server received a file from => " + serverIpAddress + "\n";
-                fos.write(history.getBytes());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            if (result != null) {
+                messageArray.add(new Message("New File Received: " + result, 1, Calendar.getInstance().getTime()));
+                messageList.setAdapter(mAdapter);
 
+            }
         }
     }
+
+
 
 }

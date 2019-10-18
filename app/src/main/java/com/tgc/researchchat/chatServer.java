@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -96,7 +97,7 @@ public class chatServer extends Thread {
                 stringBuilder.deleteCharAt(0);
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
-                File path = context.getObbDir();
+               /* File path = Environment.getExternalStorageDirectory();
                 Log.i(TAG, "FilesDir =>" + path + "\n");
                 @SuppressLint("SimpleDateFormat") String fileName = new SimpleDateFormat("yyyyMMdd").format(new Date()) + "-" + serverIpAddress + ".txt";
                 File file = new File(path, fileName);
@@ -106,7 +107,7 @@ public class chatServer extends Thread {
                     fos.write(history.getBytes());
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
+                }*/
                 messageArray.add(new Message(result, 1, Calendar.getInstance().getTime()));
                 messageList.setAdapter(mAdapter);
             } else {
@@ -114,7 +115,7 @@ public class chatServer extends Thread {
                 stringBuilder.deleteCharAt(0);
                 stringBuilder.deleteCharAt(0);
                 result = stringBuilder.toString();
-                ListView message_List;
+                RecyclerView message_List;
                 message_List = activity.findViewById(R.id.message_list);
                 LayerDrawable layerDrawable = (LayerDrawable) message_List.getBackground();
                 GradientDrawable gradientDrawable = (GradientDrawable) layerDrawable.findDrawableByLayerId(R.id.shapeColor);

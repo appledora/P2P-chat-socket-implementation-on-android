@@ -136,7 +136,7 @@ public class ChatAdapterRecycler extends RecyclerView.Adapter {
                 StringBuilder stringBuilder = new StringBuilder(fileName[1]);
                 stringBuilder.deleteCharAt(0);
                 String path = stringBuilder.toString();
-                String directory = context.getObbDir() + "/downloadFolder/" + path;
+                String directory = Environment.getExternalStorageDirectory() + "/Download/" + path;
                 Log.d(TAG, "bind: Print Directory:" + directory);
                 File imgFile = new File(directory);
                 if (imgFile.exists()) {
